@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  font-family: 'Cairo', 'Inter', sans-serif;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white px-3 py-2 focus:ring-2 focus:ring-primary-400 outline-none transition;
+  }
+}

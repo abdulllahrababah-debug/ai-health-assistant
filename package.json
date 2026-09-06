@@ -1,0 +1,13 @@
+﻿{
+  "name": "ai-health-assistant",
+  "version": "1.0.0",
+  "description": "AI Health Assistant - Clinical Diagnosis & Smart Triage Platform",
+  "main": "backend/server.js",
+  "scripts": {
+    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend",
+    "start": "node backend/server.js"
+  },
+  "keywords": ["ai", "health", "react", "express"],
+  "author": "",
+  "license": "MIT"
+}
