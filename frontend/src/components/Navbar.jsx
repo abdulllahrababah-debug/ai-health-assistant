@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 
@@ -27,7 +27,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Brand Logo */}
         <div className="flex items-center gap-6">
-          <Link to="/" className="flex items-center gap-2 font-black text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl">
+          <Link to={user ? "/assessment" : "/login"} className="flex items-center gap-2 font-black text-indigo-600 dark:text-indigo-400 text-lg sm:text-xl">
             <span className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center text-xl shadow-md shadow-indigo-500/25">
               🩺
             </span>

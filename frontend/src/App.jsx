@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import Navbar from './components/Navbar';
@@ -26,10 +26,11 @@ export default function App() {
           
           <main className="flex-1">
             <Routes>
-              {/* Default first page is Login */}
+              {/* Default first page is Login / Create Account */}
               <Route path="/" element={<Login />} />
-              <Route path="/home" element={<Home />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Login defaultRegister={true} />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               
               {/* Main Medical Tools */}

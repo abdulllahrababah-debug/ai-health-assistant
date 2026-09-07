@@ -1,16 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import api from '../api/client';
 
-export default function Login() {
-  const { t, login } = useApp();
+export default function Login({ defaultRegister = false }) {
+  const { t, login, user } = useApp();
   const navigate = useNavigate();
-  const [isRegister, setIsRegister] = useState(false);
+  const location = useLocation();
+  const [isRegister, setIsRegister] = useState(
+    defaultRegister || location.pathname === '/register' || location.search.includes('register')
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ full_name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // If user is already logged in, redirect to assessment
+  useEffect(() => {
+    if (user) {
+      navigate('/assessment', { replace: true });
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (defaultRegister || location.pathname === '/register') {
+      setIsRegister(true);
+    }
+  }, [defaultRegister, location.pathname]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 

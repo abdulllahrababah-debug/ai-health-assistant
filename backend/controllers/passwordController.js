@@ -22,22 +22,40 @@ exports.forgotPassword = async (req, res) => {
       [resetToken, expires, user.id]
     );
 
-    let emailResult = null;
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
+
+    let emailSent = false;
+    let emailErrorMessage = null;
+
     try {
-      emailResult = await sendPasswordResetEmail(user.email, resetToken, user.full_name);
+      const emailResult = await sendPasswordResetEmail(user.email, resetToken, user.full_name);
+      if (emailResult && !emailResult.mock) {
+        emailSent = true;
+      }
     } catch (emailErr) {
       console.error('Email send error:', emailErr.message);
+      emailErrorMessage = emailErr.message;
     }
 
-    if (emailResult && emailResult.mock) {
+    if (emailSent) {
       return res.json({
-        message: 'تم إنشاء رابط استرداد كلمة المرور بنجاح.',
-        mockLink: emailResult.resetUrl,
-        isMock: true,
+        success: true,
+        emailSent: true,
+        message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح! يرجى تفقد صندوق الوارد أو مجلد الرسائل غير المرغوب فيها (Spam).',
       });
     }
 
-    res.json({ message: 'إذا كان هذا البريد مسجلاً، فقد تم إرسال رابط الاسترداد إلى بريدك الإلكتروني بنجاح.' });
+    // If email failed or SMTP not configured: provide direct link
+    return res.json({
+      success: true,
+      emailSent: false,
+      message: emailErrorMessage
+        ? `تعذر تسليم الإيميل عبر مزود البريد (${emailErrorMessage}). يمكنك المتابعة عبر رابط الاسترداد المباشر أدناه:`
+        : 'تم إنشاء رابط استرداد كلمة المرور بنجاح. يمكنك المتابعة بالضغط على الرابط أدناه:',
+      mockLink: resetUrl,
+      isMock: true,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'حدث خطأ في الخادم أثناء معالجة الطلب' });

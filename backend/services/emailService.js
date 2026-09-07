@@ -1,18 +1,38 @@
-﻿const nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer');
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+function createTransporter() {
+  const user = (process.env.EMAIL_USER || '').trim();
+  // Strip any accidental spaces from Google 16-char App Password (e.g. "abcd efgh ijkl mnop" -> "abcdefghijklmnop")
+  const pass = (process.env.EMAIL_PASS || '').replace(/\s+/g, '');
+
+  if (!user || !pass) {
+    return null;
+  }
+
+  if (process.env.EMAIL_HOST) {
+    return nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT) || 587,
+      secure: process.env.EMAIL_SECURE === 'true',
+      auth: { user, pass },
+      connectionTimeout: 10000,
+    });
+  }
+
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  });
+}
 
 async function sendPasswordResetEmail(toEmail, resetToken, userName) {
   const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
   const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
   const mailOptions = {
-    from: `"AI Health Assistant" <${process.env.EMAIL_USER || 'support@health.ai'}>`,
+    from: `"AI Health Assistant" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'support@health.ai'}>`,
     to: toEmail,
     subject: 'إعادة تعيين كلمة المرور - AI Health Assistant',
     html: `
@@ -35,12 +55,16 @@ async function sendPasswordResetEmail(toEmail, resetToken, userName) {
     `,
   };
 
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log('[EmailService Mock Mode] Reset link for ' + toEmail + ': ' + resetUrl);
+  const transporter = createTransporter();
+  if (!transporter) {
+    console.log('[EmailService] EMAIL_USER or EMAIL_PASS not set. Falling back to direct link mode for ' + toEmail);
     return { mock: true, resetUrl };
   }
 
-  return await transporter.sendMail(mailOptions);
+  console.log(`[EmailService] Attempting to send reset email to ${toEmail}...`);
+  const info = await transporter.sendMail(mailOptions);
+  console.log(`[EmailService] Email sent successfully: ${info.messageId}`);
+  return { success: true, messageId: info.messageId, resetUrl };
 }
 
 module.exports = { sendPasswordResetEmail };
