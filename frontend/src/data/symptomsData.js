@@ -10,6 +10,7 @@ const SYMPTOMS = [
   { code: 'unexplained_weight_loss', name_ar: 'نزول وزن مفاجئ غير مبرر', name_en: 'Unexplained Weight Loss', icon: '⚖️', category: 'general', emergency: false },
 
   // 2. الأعراض التنفسية والصدرية (Respiratory & Chest)
+  { code: 'cough', name_ar: 'سعال / كحة مستمرة', name_en: 'Cough', icon: '🗣️', category: 'respiratory', emergency: false },
   { code: 'cough_dry', name_ar: 'سعال جاف مستمر', name_en: 'Dry Cough', icon: '🤧', category: 'respiratory', emergency: false },
   { code: 'cough_phlegm', name_ar: 'سعال مصحوب ببلغم', name_en: 'Productive Cough with Phlegm', icon: '😷', category: 'respiratory', emergency: false },
   { code: 'shortness_of_breath', name_ar: 'ضيق وصعوبة في التنفس', name_en: 'Shortness of Breath', icon: '🫁', category: 'respiratory', emergency: true },

@@ -71,7 +71,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal server error', error: err.message });
 });
 
+const autoMigrate = require('./database/autoMigrate');
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`AI Health Assistant API listening on port ${PORT}`);
+  try {
+    await autoMigrate();
+  } catch (err) {
+    console.error('AutoMigrate error on startup:', err.message);
+  }
 });

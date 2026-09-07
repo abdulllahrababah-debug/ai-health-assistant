@@ -69,27 +69,32 @@ export default function Assessment() {
   const [severity, setSeverity] = useState('mild');
   const [followupAnswers, setFollowupAnswers] = useState({});
 
-  // Load symptoms from backend with fallback
+  // Load symptoms: always start with full fallback list (51 symptoms),
+  // then enrich with any EXTRA symptoms from the DB that aren't already in the fallback.
+  // This ensures all symptoms are always visible even if the Render DB is partially seeded.
   useEffect(() => {
     api
       .get('/symptoms')
       .then(({ data }) => {
         if (Array.isArray(data) && data.length) {
-          // Merge icons & categories from fallback if DB lacks them
-          const merged = data.map((sym) => {
-            const fallback = SYMPTOMS_FALLBACK.find((f) => f.code === sym.code);
-            return {
+          // Build a set of codes already in the fallback
+          const fallbackCodes = new Set(SYMPTOMS_FALLBACK.map((f) => f.code));
+          // Find DB symptoms that are NOT in the fallback (genuinely new ones)
+          const extras = data
+            .filter((sym) => !fallbackCodes.has(sym.code))
+            .map((sym) => ({
               ...sym,
-              icon: sym.icon || fallback?.icon || '🩹',
-              category: sym.category || fallback?.category || 'general',
-              emergency: Boolean(sym.emergency || sym.is_emergency_flag || fallback?.emergency),
-            };
-          });
-          setSymptomsList(merged);
+              icon: sym.icon || '🩹',
+              category: sym.category || 'general',
+              emergency: Boolean(sym.emergency || sym.is_emergency_flag),
+            }));
+          // Always use the full fallback + any extras from DB
+          setSymptomsList([...SYMPTOMS_FALLBACK, ...extras]);
         }
+        // If DB returns empty array, SYMPTOMS_FALLBACK is already set as default
       })
       .catch(() => {
-        setSymptomsList(SYMPTOMS_FALLBACK);
+        // Network error: fallback is already set as default state, nothing to do
       });
   }, []);
 
