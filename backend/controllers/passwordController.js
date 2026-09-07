@@ -22,7 +22,7 @@ exports.forgotPassword = async (req, res) => {
       [resetToken, expires, user.id]
     );
 
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+    const clientUrl = process.env.CLIENT_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000';
     const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
 
     let emailSent = false;

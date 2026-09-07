@@ -29,7 +29,7 @@ function createTransporter() {
 }
 
 async function sendPasswordResetEmail(toEmail, resetToken, userName) {
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
+  const clientUrl = process.env.CLIENT_URL || process.env.RENDER_EXTERNAL_URL || 'http://localhost:3000';
   const resetUrl = `${clientUrl}/reset-password?token=${resetToken}`;
   const mailOptions = {
     from: `"AI Health Assistant" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'support@health.ai'}>`,
