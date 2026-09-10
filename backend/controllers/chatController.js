@@ -1,4 +1,4 @@
-﻿const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const pool = require('../config/db');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -12,8 +12,27 @@ const CANDIDATE_MODELS = [
 // ─────────────────────────────────────────────────────────────
 // SYSTEM PROMPT — Comprehensive Clinical AI Doctor
 // ─────────────────────────────────────────────────────────────
-function buildDoctorSystemPrompt(medicalContext) {
+function buildDoctorSystemPrompt(medicalContext, language = 'ar') {
   const ctx = medicalContext || '';
+  if (language === 'en') {
+    return `You are an expert AI clinical consultant physician specialized in primary care and internal medicine, practicing within the AI Health Assistant platform.
+Your mission is to conduct a compassionate, interactive, highly professional, and clinically accurate medical consultation in English.
+
+## Clinical Protocol & Interaction Guidelines:
+1. **Empathy & Reassurance:** Open your response with a supportive, reassuring clinical greeting (e.g., "Thank you for reaching out. I understand this must be uncomfortable, and I am here to help guide you safely.").
+2. **Clarifying Clinical Questions:** Ask 2 to 4 clearly numbered, specific diagnostic questions to assess:
+   - Precise anatomical location and radiation of symptoms.
+   - Onset (sudden vs gradual), duration, and provoking/relieving factors.
+   - Quality/character (throbbing, sharp, burning, pressure, dull ache) and severity score (1 to 10).
+   - Accompanying red flags (fever, shortness of breath, dizziness, nausea, sensory deficits).
+3. **Safe Interim Home Measures:** Offer practical, evidence-based temporary home-care measures (rest, appropriate cold/warm compresses, hydration, safe positioning).
+4. **Emergency Red Flags Warning:** Explicitly highlight any critical warning signs that mandate immediate emergency medical attention (calling 911 or visiting nearest emergency department).
+5. **Recommended Medical Specialty:** Always conclude with a prominent paragraph:
+   🏥 **Recommended Medical Specialty for Consultation:** [Exact medical specialty, e.g. Orthopedic Surgery, Cardiology, Neurology, Gastroenterology, Dermatology, Pulmonology].
+6. **Completeness:** Deliver a thorough, comprehensive response without truncating or leaving sentences unfinished.
+${ctx}`;
+  }
+
   return `أنت طبيب استشاري ذكي وخبير في الرعاية الصحية الأولية والطب الباطني، تعمل ضمن منصة AI Health Assistant في الأردن والوطن العربي.
 مهمتك إجراء محادثة طبية تفاعلية، دافئة، وشديدة المهنية والدقة باللغة العربية.
 
@@ -36,11 +55,96 @@ ${ctx}`;
 // ─────────────────────────────────────────────────────────────
 // COMPREHENSIVE CLINICAL FALLBACK ENGINE
 // ─────────────────────────────────────────────────────────────
-function buildClinicalFallback(message) {
-  const msg = (message || '').toLowerCase()
+function buildClinicalFallback(message, language = 'ar') {
+  const isEn = language === 'en' || /^[a-zA-Z0-9\s.,?!'-]+$/.test((message || '').trim().slice(0, 30));
+  const rawMsg = (message || '').toLowerCase();
+  const msg = rawMsg
     .replace(/ي/g, 'ي').replace(/ة/g, 'ه').replace(/أ|إ|آ/g, 'ا');
 
-  const has = (...words) => words.some(w => msg.includes(w));
+  const has = (...words) => words.some(w => msg.includes(w) || rawMsg.includes(w.toLowerCase()));
+
+  if (isEn) {
+    if (has('chest pain', 'heart attack', 'shortness of breath', 'unconscious', 'faint', 'stroke', 'bleeding', 'severe burn')) {
+      return `⚠️ **IMMEDIATE EMERGENCY ALERT:**
+Your reported symptoms indicate potentially critical red flags that require urgent medical evaluation without delay!
+
+🚨 **Immediate Action Required:**
+1. Call Emergency Services (**911** in Jordan / international equivalent) immediately.
+2. Sit in a comfortable, supported position and avoid any physical exertion.
+3. Keep someone nearby to assist you while emergency responders are en route.
+
+🏥 **Urgent Department:** Emergency Medicine & Trauma at the nearest hospital.`;
+    }
+
+    if (has('leg', 'knee', 'foot', 'ankle', 'joint', 'walk', 'limp', 'sprain', 'bone')) {
+      return `I am sorry to hear you are dealing with leg/joint discomfort. Lower limb pain is very common and can stem from muscle strain, ligament sprain, or joint inflammation.
+
+**To better assess your situation, please let me know:**
+1. Exactly where is the pain centered (knee, calf muscle, thigh, ankle, or bottom of the foot)?
+2. Did it begin abruptly after a twist/impact, or did it develop progressively?
+3. Do you notice swelling, redness, or heat over the area?
+4. Are you able to bear full weight and walk, or is it severely limited?
+
+**Immediate Safe Self-Care Guidance:**
+• **Rest & Offload:** Avoid strenuous walking, running, or prolonged standing.
+• **Elevation:** Elevate your leg on pillows while resting to reduce swelling and venous pooling.
+• **Ice/Warmth:** Apply a cloth-wrapped ice pack for 15 minutes 3 times daily for acute pain/sprains.
+• **Over-the-counter pain relief:** Acetaminophen/Paracetamol can be taken if medically safe for you.
+
+⚠️ **Seek prompt care if:** You notice acute calf swelling with warmth and redness, or complete inability to bear weight.
+
+🏥 **Recommended Medical Specialty for Consultation:** Orthopedic Surgery & Sports Medicine (or Rheumatology).`;
+    }
+
+    if (has('headache', 'migraine', 'head', 'dizzy', 'dizziness', 'vertigo', 'tinnitus')) {
+      return `Headache and dizziness are frequent complaints, most commonly related to tension, fatigue, dehydration, or migraine.
+
+**Key Differential Possibilities:**
+1. **Tension-type Headache:** Muscle contraction in neck and scalp due to stress or screen strain (>70% of cases).
+2. **Migraine:** Throbbing unilateral headache often accompanied by light/sound sensitivity and nausea.
+3. **Dehydration or Eye Strain:** From insufficient fluid intake or prolonged display exposure.
+
+**Immediate Practical Tips:**
+• Drink two large glasses of water immediately.
+• Rest in a quiet, dark, well-ventilated room.
+• Apply a cool compress across your forehead and back of your neck.
+
+⚠️ **Emergency Warning:** Visit the ER immediately if the headache is sudden and explosive (worst headache of your life), or accompanied by neck stiffness, high fever, or vision loss.
+
+🏥 **Recommended Medical Specialty for Consultation:** Neurology or Primary Care / Family Medicine.`;
+    }
+
+    if (has('stomach', 'abdomen', 'belly', 'diarrhea', 'constipation', 'nausea', 'vomit', 'acid', 'heartburn', 'cramp')) {
+      return `Abdominal discomfort and digestive symptoms can have multiple causes, most of which respond well to gentle supportive care.
+
+**Common Likely Causes:**
+1. **Gastroenteritis (Stomach Flu):** Viral or foodborne, causing cramps, loose stools, and nausea.
+2. **Acid Reflux & GERD:** Burning retrosternal sensation worsening after heavy or spicy meals.
+3. **Irritable Bowel Syndrome (IBS):** Cramping, bloating, and irregular bowel habits triggered by stress or food.
+
+**Home Management Steps:**
+• Avoid greasy, spicy foods, caffeine, and dairy temporarily.
+• Eat bland meals: plain boiled rice, toast, bananas, and clear broth.
+• Stay hydrated with frequent small sips of water and oral rehydration salts.
+• Warm chamomile or mint tea can help relax intestinal spasms.
+
+⚠️ **Consult a doctor promptly if:** You notice blood in stool or vomit, severe localized pain in the lower right abdomen, or dehydration.
+
+🏥 **Recommended Medical Specialty for Consultation:** Gastroenterology & Hepatology.`;
+    }
+
+    return `Hello and welcome to your smart clinical consultation. I have received your message with care and am here to assist you.
+
+**To help me provide the most precise medical guidance, please share:**
+1. What is the main symptom or discomfort you are feeling?
+2. How long have you had it (hours, days, weeks)?
+3. Are there any other accompanying symptoms (such as fever, nausea, dizziness, or localized pain)?
+4. Do you have any known chronic conditions or take regular medications?
+
+I look forward to your response so I can assist you with targeted clinical recommendations!
+
+🏥 **Recommended Specialty for Initial Review:** Family Medicine / Internal Medicine.`;
+  }
 
   // Emergency Red Flags
   if (has('الم صدر شديد', 'صعوبه تنفس', 'ضيق تنفس حاد', 'فقدان وعي', 'اغماء', 'شلل', 'نزيف شديد', 'جلطه')) {
@@ -199,9 +303,9 @@ function buildClinicalFallback(message) {
 // ─────────────────────────────────────────────────────────────
 exports.sendMessage = async (req, res) => {
   try {
-    const { message, history = [] } = req.body;
+    const { message, history = [], language = 'ar' } = req.body;
     if (!message || !message.trim()) {
-      return res.status(400).json({ message: 'الرسالة مطلوبة' });
+      return res.status(400).json({ message: language === 'en' ? 'Message is required' : 'الرسالة مطلوبة' });
     }
 
     // Fetch patient medical profile if logged in
@@ -220,15 +324,28 @@ exports.sendMessage = async (req, res) => {
         if (rows.length > 0) {
           const p = rows[0];
           const parts = [];
-          if (p.full_name) parts.push('اسم المريض: ' + p.full_name);
-          if (p.age) parts.push('العمر: ' + p.age + ' سنة');
-          if (p.gender) parts.push('الجنس: ' + (p.gender === 'male' ? 'ذكر' : 'أنثى'));
-          if (p.blood_type) parts.push('فصيلة الدم: ' + p.blood_type);
-          if (p.chronic_diseases) parts.push('الأمراض المزمنة: ' + p.chronic_diseases);
-          if (p.current_medications) parts.push('الأدوية الحالية: ' + p.current_medications);
-          if (p.allergies) parts.push('الحساسية: ' + p.allergies);
-          if (parts.length > 0) {
-            medicalContext = '\n\n## السجل الطبي للمريض:\n' + parts.join('\n');
+          if (language === 'en') {
+            if (p.full_name) parts.push('Patient Name: ' + p.full_name);
+            if (p.age) parts.push('Age: ' + p.age + ' years');
+            if (p.gender) parts.push('Gender: ' + (p.gender === 'male' ? 'Male' : 'Female'));
+            if (p.blood_type) parts.push('Blood Type: ' + p.blood_type);
+            if (p.chronic_diseases) parts.push('Chronic Diseases: ' + p.chronic_diseases);
+            if (p.current_medications) parts.push('Current Medications: ' + p.current_medications);
+            if (p.allergies) parts.push('Allergies: ' + p.allergies);
+            if (parts.length > 0) {
+              medicalContext = '\n\n## Patient Medical Profile:\n' + parts.join('\n');
+            }
+          } else {
+            if (p.full_name) parts.push('اسم المريض: ' + p.full_name);
+            if (p.age) parts.push('العمر: ' + p.age + ' سنة');
+            if (p.gender) parts.push('الجنس: ' + (p.gender === 'male' ? 'ذكر' : 'أنثى'));
+            if (p.blood_type) parts.push('فصيلة الدم: ' + p.blood_type);
+            if (p.chronic_diseases) parts.push('الأمراض المزمنة: ' + p.chronic_diseases);
+            if (p.current_medications) parts.push('الأدوية الحالية: ' + p.current_medications);
+            if (p.allergies) parts.push('الحساسية: ' + p.allergies);
+            if (parts.length > 0) {
+              medicalContext = '\n\n## السجل الطبي للمريض:\n' + parts.join('\n');
+            }
           }
         }
       } catch (dbErr) {
@@ -236,7 +353,7 @@ exports.sendMessage = async (req, res) => {
       }
     }
 
-    const systemPrompt = buildDoctorSystemPrompt(medicalContext);
+    const systemPrompt = buildDoctorSystemPrompt(medicalContext, language);
 
     // Build chat conversation history for Gemini
     const contents = [];
@@ -290,7 +407,7 @@ exports.sendMessage = async (req, res) => {
 
     // Fallback: Comprehensive clinical response
     console.warn('All Gemini models failed, serving rich clinical fallback. Last error:', lastError?.message);
-    const fallbackReply = buildClinicalFallback(message);
+    const fallbackReply = buildClinicalFallback(message, language);
     return res.json({ reply: fallbackReply });
 
   } catch (err) {
@@ -304,10 +421,27 @@ exports.sendMessage = async (req, res) => {
 // ─────────────────────────────────────────────────────────────
 exports.analyzeImage = async (req, res) => {
   try {
-    const { imageBase64, mimeType = 'image/jpeg', question = 'ما هذه الحالة الجلدية؟ هل تبدو خطيرة وما التوصيات الطبية؟' } = req.body;
-    if (!imageBase64) return res.status(400).json({ message: 'الصورة مطلوبة للتحليل' });
+    const { imageBase64, mimeType = 'image/jpeg', question, language = 'ar' } = req.body;
+    if (!imageBase64) {
+      return res.status(400).json({ message: language === 'en' ? 'Image is required for analysis' : 'الصورة مطلوبة للتحليل' });
+    }
 
-    const imageSysPrompt = `أنت طبيب استشاري خبير في الأمراض الجلدية وطب الطوارئ.
+    const isEn = language === 'en';
+    const defaultQuestion = isEn 
+      ? 'What is this skin/medical condition? Does it look serious, and what are your clinical recommendations?'
+      : 'ما هذه الحالة الجلدية؟ هل تبدو خطيرة وما التوصيات الطبية؟';
+    const targetQuestion = question || defaultQuestion;
+
+    const imageSysPrompt = isEn
+      ? `You are an expert medical consultant specialized in Dermatology and Emergency Medicine.
+Analyze the attached clinical/skin image and provide an accurate, structured medical evaluation in English:
+1. **Objective Visual Findings:** Detailed inspection of visible lesions (color, erythema, margins, elevated borders, papules/vesicles, scaling, discharge).
+2. **Most Probable Conditions (Differential Diagnoses):** e.g., Contact dermatitis, eczema, urticaria, fungal infection (tinea), bacterial folliculitis/cellulitis.
+3. **Critical Warning Signs (Red Flags):** Immediate emergency warning signs (rapid spreading borders, systemic fever, purulence/abscess, severe pain, streaking).
+4. **Safe Temporary Home Measures:** Non-pharmacological soothing tips (cool dry compresses, avoiding harsh soaps, fragrance-free moisturizers, strictly no scratching).
+5. 🏥 **Recommended Medical Specialty for In-Person Consultation:** [e.g., Dermatology or Urgent Care].
+Note: Clearly state that this is an educational AI assessment and not an in-person physical clinical diagnosis.`
+      : `أنت طبيب استشاري خبير في الأمراض الجلدية وطب الطوارئ.
 حلل الصورة المرفقة وقدم تقييماً سريرياً دقيقاً باللغة العربية يشمل:
 1. الوصف العيني الدقيق لما يظهر في الصورة (اللون، الانتفاخ، الحواف، القشور، الإفرازات).
 2. الحالات الأكثر ترجيحاً (مثل: التهاب جلد تماسي، إكزيما، شرى، عدوى فطرية أو بكتيرية).
@@ -333,7 +467,7 @@ exports.analyzeImage = async (req, res) => {
 
         const result = await Promise.race([
           model.generateContent([
-            question,
+            targetQuestion,
             { inlineData: { data: imageBase64, mimeType } },
           ]),
           timeoutPromise,
@@ -348,6 +482,23 @@ exports.analyzeImage = async (req, res) => {
 
     if (analysis && analysis.trim().length > 20) {
       return res.json({ analysis: analysis.trim() });
+    }
+
+    if (isEn) {
+      return res.json({
+        analysis: `🔍 **Preliminary Clinical Assessment:**
+
+• **Visual Findings:** The image shows localized skin tissue alterations (localized erythema, irritation, or rash).
+• **Common Potential Diagnoses:** Likely considerations include Contact Dermatitis (allergic or irritant), superficial eczema, urticaria, or early localized fungal/bacterial infection.
+• **Immediate Home Care Recommendations:**
+  1. Gently wash the area with lukewarm water and mild, fragrance-free soap without vigorous rubbing.
+  2. Strictly avoid scratching or excoriating the lesions to prevent secondary bacterial infection.
+  3. Do not apply strong corticosteroid or unprescribed antibiotic creams prior to in-person clinical review.
+
+⚠️ **Emergency Red Flags:** If the rash is spreading rapidly, accompanied by facial/lip swelling, difficulty breathing, high fever, or visible pus formation, go to the nearest Emergency Department immediately.
+
+🏥 **Recommended Medical Specialty for Consultation:** Dermatology Clinic or Urgent Care.`
+      });
     }
 
     return res.json({

@@ -1,11 +1,15 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useApp } from '../context/AppContext';
 import api from '../api/client';
 
 export default function MedicineGuide() {
+  const { t, language } = useApp();
   const [medicines, setMedicines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedMed, setSelectedMed] = useState(null);
+
+  const isEn = language === 'en';
 
   useEffect(() => {
     fetchMedicines();
@@ -31,7 +35,7 @@ export default function MedicineGuide() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900 py-10 px-4" dir="rtl">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900 py-10 px-4" dir={isEn ? 'ltr' : 'rtl'}>
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-8">
@@ -39,10 +43,12 @@ export default function MedicineGuide() {
             💊
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white">
-            دليل الأدوية والاستخدام الآمن
+            {isEn ? 'Medicine Guide & Safe Usage' : 'دليل الأدوية والاستخدام الآمن'}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            مرجع دوائي سريع للأدوية الأكثر شيوعاً، جرعات البالغين الموصى بها، موانع الاستعمال، والتحذيرات السريرية
+            {isEn
+              ? 'Quick clinical reference for common medications, recommended adult dosages, contraindications, and warnings'
+              : 'مرجع دوائي سريع للأدوية الأكثر شيوعاً، جرعات البالغين الموصى بها، موانع الاستعمال، والتحذيرات السريرية'}
           </p>
         </div>
 
@@ -50,7 +56,9 @@ export default function MedicineGuide() {
         <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-2xl flex items-center gap-3 text-xs text-amber-900 dark:text-amber-200 font-medium">
           <span className="text-2xl">⚠️</span>
           <span>
-            تنبيه: هذا الدليل للتثقيف الدوائي وزيادة الوعي الصحي فقط. لا تبدأ أو تعدل أي جرعة دوائية دون استشارة الطبيب المعالج أو الصيدلاني المرخص.
+            {isEn
+              ? 'Notice: This guide is for pharmacological education only. Never start, modify, or discontinue any medication without consulting your prescribing physician or licensed pharmacist.'
+              : 'تنبيه: هذا الدليل للتثقيف الدوائي وزيادة الوعي الصحي فقط. لا تبدأ أو تعدل أي جرعة دوائية دون استشارة الطبيب المعالج أو الصيدلاني المرخص.'}
           </span>
         </div>
 
@@ -61,71 +69,74 @@ export default function MedicineGuide() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="ابحث باسم الدواء (العلمي أو التجاري) أو دواعي الاستعمال..."
-              className="w-full px-5 py-3.5 pr-11 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-sm text-sm"
+              placeholder={isEn ? 'Search medicine by trade or generic name (e.g. Paracetamol, Metformin)...' : 'ابحث باسم الدواء التجاري أو العلمي (مثال: باراسيتامول، فنتولين)...'}
+              className="w-full px-5 py-3.5 pe-11 ps-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-sm text-sm"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-base">
+            <span className="absolute end-4 top-1/2 -translate-y-1/2 text-gray-400 text-base">
               🔍
             </span>
           </div>
           <button
             type="submit"
-            className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-sm shadow-md transition-all"
+            className="px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl text-sm shadow-md transition-all cursor-pointer"
           >
-            بحث
+            {isEn ? 'Search' : 'بحث'}
           </button>
         </form>
 
-        {/* Medicines Grid */}
+        {/* Medicines List */}
         {loading ? (
           <div className="min-h-[40vh] flex items-center justify-center">
             <div className="w-12 h-12 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin"></div>
           </div>
+        ) : medicines.length === 0 ? (
+          <div className="bg-white dark:bg-gray-800 rounded-3xl p-12 text-center border border-gray-100 dark:border-gray-700">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              {isEn ? 'No medicines match your search.' : 'لم يتم العثور على أدوية مطابقة للبحث.'}
+            </p>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {medicines.map((med) => (
+            {medicines.map((m) => (
               <div
-                key={med.id}
-                onClick={() => setSelectedMed(med)}
+                key={m.id}
+                onClick={() => setSelectedMed(m)}
                 className="bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-100 dark:border-gray-700 hover:border-emerald-300 shadow-sm hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div>
-                      <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-0.5 rounded-full">
-                        {med.category}
+                      <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-0.5 rounded-full">
+                        {m.category || (isEn ? 'General' : 'دواء')}
                       </span>
                       <h3 className="font-bold text-gray-900 dark:text-white text-lg mt-1">
-                        {med.name_ar}
+                        {isEn ? (m.name_en || m.name_ar) : m.name_ar}
                       </h3>
-                      <span className="text-xs text-gray-400 font-medium">{med.name_en}</span>
+                      <span className="text-xs text-gray-400 font-medium">
+                        {isEn ? m.name_ar : m.name_en}
+                      </span>
                     </div>
-                    <span className="text-2xl">💊</span>
                   </div>
 
-                  <div className="mt-3 space-y-2 text-xs">
-                    <div>
-                      <span className="font-bold text-gray-700 dark:text-gray-300 block mb-0.5">
-                        الاستخدام:
-                      </span>
-                      <p className="text-gray-600 dark:text-gray-400 line-clamp-2">{med.uses}</p>
-                    </div>
-
-                    <div className="p-2.5 bg-emerald-50/40 dark:bg-emerald-950/20 rounded-xl">
-                      <span className="font-bold text-emerald-800 dark:text-emerald-300 block mb-0.5">
-                        الجرعة الاعتيادية للبالغين:
-                      </span>
-                      <p className="text-emerald-900 dark:text-emerald-200">{med.dosage_adult}</p>
-                    </div>
+                  <div className="space-y-2 mt-3 text-xs">
+                    <p className="text-gray-600 dark:text-gray-300 line-clamp-2">
+                      <strong className="text-gray-800 dark:text-gray-100">
+                        {isEn ? 'Primary Uses: ' : 'الاستخدام الأساسي: '}
+                      </strong>
+                      {m.uses}
+                    </p>
+                    <p className="text-emerald-700 dark:text-emerald-300 font-semibold line-clamp-1">
+                      💊 {isEn ? 'Adult Dosage: ' : 'الجرعة الشائعة: '}{m.dosage_adult}
+                    </p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs mt-4">
-                  <span className="text-red-500 font-bold flex items-center gap-1">
-                    <span>⚠️</span> تحذيرات هامة
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between text-xs mt-4">
+                  <span className="text-amber-600 dark:text-amber-400 font-medium">
+                    ⚠️ {isEn ? 'Important Warnings' : 'تحذيرات هامة'}
                   </span>
                   <span className="text-emerald-600 dark:text-emerald-400 font-bold">
-                    عرض ورقة الدواء ←
+                    {isEn ? 'Full Details →' : 'التفاصيل كاملة ←'}
                   </span>
                 </div>
               </div>
@@ -149,56 +160,54 @@ export default function MedicineGuide() {
                     {selectedMed.category}
                   </span>
                   <h2 className="text-2xl font-black text-gray-900 dark:text-white">
-                    {selectedMed.name_ar}
+                    {isEn ? (selectedMed.name_en || selectedMed.name_ar) : selectedMed.name_ar}
                   </h2>
-                  <p className="text-xs text-gray-400">{selectedMed.name_en}</p>
+                  <p className="text-xs text-gray-400">{isEn ? selectedMed.name_ar : selectedMed.name_en}</p>
                 </div>
                 <button
                   onClick={() => setSelectedMed(null)}
-                  className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 flex items-center justify-center font-bold"
+                  className="w-9 h-9 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 flex items-center justify-center font-bold cursor-pointer"
                 >
                   ✕
                 </button>
               </div>
 
               <div className="space-y-4 text-sm leading-relaxed">
-                <div>
-                  <h4 className="text-xs font-bold text-gray-400 mb-1">دواعي الاستعمال</h4>
-                  <p className="text-gray-800 dark:text-gray-200">{selectedMed.uses}</p>
-                </div>
-
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl">
+                <div className="p-4 bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900 rounded-2xl">
                   <h4 className="text-xs font-bold text-emerald-800 dark:text-emerald-300 mb-1">
-                    الجرعة الموصى بها للبالغين
+                    {isEn ? 'Indications & Uses' : 'دواعي الاستعمال'}
                   </h4>
-                  <p className="text-xs text-emerald-900 dark:text-emerald-200 font-medium">
-                    {selectedMed.dosage_adult}
-                  </p>
+                  <p className="text-xs text-emerald-950 dark:text-emerald-200">{selectedMed.uses}</p>
                 </div>
 
-                <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl">
-                  <h4 className="text-xs font-bold text-rose-800 dark:text-rose-300 mb-1 flex items-center gap-1.5">
-                    <span>🛑</span> موانع الاستعمال والتحذيرات السريرية
+                <div className="p-4 bg-blue-50/50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900 rounded-2xl">
+                  <h4 className="text-xs font-bold text-blue-800 dark:text-blue-300 mb-1">
+                    {isEn ? 'Recommended Adult Dosage' : 'الجرعة المعتادة للبالغين'}
                   </h4>
-                  <p className="text-xs text-rose-900 dark:text-rose-200 leading-relaxed font-medium">
-                    {selectedMed.warnings}
-                  </p>
+                  <p className="text-xs text-blue-950 dark:text-blue-200">{selectedMed.dosage_adult}</p>
                 </div>
 
-                <div className="p-4 bg-gray-50 dark:bg-gray-750 border border-gray-100 dark:border-gray-700 rounded-2xl">
-                  <h4 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">
-                    الآثار الجانبية المحتملة
+                <div className="p-4 bg-amber-50/50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900 rounded-2xl">
+                  <h4 className="text-xs font-bold text-amber-800 dark:text-amber-300 mb-1">
+                    {isEn ? 'Clinical Warnings & Contraindications' : 'موانع الاستعمال والتحذيرات'}
                   </h4>
-                  <p className="text-xs text-gray-700 dark:text-gray-300">{selectedMed.side_effects}</p>
+                  <p className="text-xs text-amber-950 dark:text-amber-200">{selectedMed.warnings}</p>
+                </div>
+
+                <div className="p-4 bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-700 rounded-2xl">
+                  <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">
+                    {isEn ? 'Possible Side Effects' : 'الآثار الجانبية المحتملة'}
+                  </h4>
+                  <p className="text-xs text-gray-600 dark:text-gray-300">{selectedMed.side_effects}</p>
                 </div>
               </div>
 
               <div className="flex justify-end pt-5 border-t border-gray-100 dark:border-gray-700 mt-6">
                 <button
                   onClick={() => setSelectedMed(null)}
-                  className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-bold"
+                  className="px-6 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-bold cursor-pointer"
                 >
-                  إغلاق
+                  {isEn ? 'Close' : 'إغلاق'}
                 </button>
               </div>
             </div>

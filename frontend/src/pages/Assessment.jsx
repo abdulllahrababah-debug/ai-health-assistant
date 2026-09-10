@@ -310,7 +310,7 @@ export default function Assessment() {
                 min="1"
                 max="120"
                 required
-                placeholder="مثال: 32"
+                placeholder={t('placeholder_age') || (language === 'en' ? 'e.g. 32' : 'مثال: 32')}
                 value={profile.age}
                 onChange={(e) => setProfile({ ...profile, age: e.target.value })}
                 className="input"
@@ -330,7 +330,7 @@ export default function Assessment() {
             <Field label={t('height')}>
               <input
                 type="number"
-                placeholder="مثال: 175"
+                placeholder={t('placeholder_height') || (language === 'en' ? 'e.g. 175' : 'مثال: 175')}
                 value={profile.height_cm}
                 onChange={(e) => setProfile({ ...profile, height_cm: e.target.value })}
                 className="input"
@@ -339,7 +339,7 @@ export default function Assessment() {
             <Field label={t('weight')}>
               <input
                 type="number"
-                placeholder="مثال: 70"
+                placeholder={t('placeholder_weight') || (language === 'en' ? 'e.g. 70' : 'مثال: 70')}
                 value={profile.weight_kg}
                 onChange={(e) => setProfile({ ...profile, weight_kg: e.target.value })}
                 className="input"
@@ -347,7 +347,7 @@ export default function Assessment() {
             </Field>
             <Field label={t('chronic_diseases')} full>
               <input
-                placeholder="مثال: ضغط دم مرتفع، سكري، ربو..."
+                placeholder={t('placeholder_chronic') || (language === 'en' ? 'e.g. Hypertension, Diabetes, Asthma...' : 'مثال: ضغط دم مرتفع، سكري، ربو...')}
                 value={profile.chronic_diseases}
                 onChange={(e) => setProfile({ ...profile, chronic_diseases: e.target.value })}
                 className="input"
@@ -355,7 +355,7 @@ export default function Assessment() {
             </Field>
             <Field label={t('current_medications')} full>
               <input
-                placeholder="مثال: أسبرين، بنادول، أوميبرازول..."
+                placeholder={t('placeholder_meds') || (language === 'en' ? 'e.g. Aspirin, Metformin, Omeprazole...' : 'مثال: أسبرين، بنادول، أوميبرازول...')}
                 value={profile.current_medications}
                 onChange={(e) => setProfile({ ...profile, current_medications: e.target.value })}
                 className="input"
@@ -363,7 +363,7 @@ export default function Assessment() {
             </Field>
             <Field label={t('drug_allergies')} full>
               <input
-                placeholder="مثال: حساسية بنسلين، حساسية سلفا..."
+                placeholder={t('placeholder_allergies') || (language === 'en' ? 'e.g. Penicillin allergy, Sulfa drugs...' : 'مثال: حساسية بنسلين، حساسية سلفا...')}
                 value={profile.drug_allergies}
                 onChange={(e) => setProfile({ ...profile, drug_allergies: e.target.value })}
                 className="input"
@@ -395,7 +395,7 @@ export default function Assessment() {
                   {t('symptoms_title')}
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                  حدد جميع الأعراض التي تشعر بها حالياً (تتوفر أكثر من 35 عرضاً)
+                  {t('symptoms_subtitle') || (language === 'en' ? 'Select all symptoms you are currently experiencing (over 60 symptoms available)' : 'حدد جميع الأعراض التي تشعر بها حالياً (تتوفر أكثر من 60 عرضاً)')}
                 </p>
               </div>
             </div>
@@ -486,7 +486,7 @@ export default function Assessment() {
                   >
                     {isEmergency && (
                       <span className="absolute top-2 end-2 text-[10px] font-bold text-danger-600 dark:text-danger-400 bg-danger-50 dark:bg-danger-950/80 px-1.5 py-0.5 rounded-full border border-danger-200 dark:border-danger-800">
-                        طوارئ
+                        {t('emergency_badge') || 'طوارئ'}
                       </span>
                     )}
                     <span className="text-2xl sm:text-3xl mb-1.5">{s.icon || '🩹'}</span>
@@ -503,7 +503,9 @@ export default function Assessment() {
             <div className="mb-6 text-sm text-danger-700 dark:text-danger-300 bg-danger-500/10 border border-danger-300 dark:border-danger-800 rounded-2xl p-4 flex items-start gap-3">
               <span className="text-2xl">⚠️</span>
               <div>
-                <strong className="block font-bold mb-0.5">تنبيه طوارئ محتمل:</strong>
+                <strong className="block font-bold mb-0.5">
+                  {language === 'en' ? 'Potential Emergency Warning:' : 'تنبيه طوارئ محتمل:'}
+                </strong>
                 <span className="text-xs leading-relaxed">{t('emergency_desc')}</span>
               </div>
             </div>
@@ -550,7 +552,7 @@ export default function Assessment() {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span>جاري تحضير الأسئلة الذكية...</span>
+                  <span>{t('preparing_questions') || 'جاري تحضير الأسئلة الذكية...'}</span>
                 </>
               ) : (
                 <>
@@ -583,7 +585,9 @@ export default function Assessment() {
           <div className="my-6 p-4 rounded-2xl bg-primary-50/70 dark:bg-primary-950/40 border border-primary-200/60 dark:border-primary-800/40 flex items-center gap-3">
             <span className="text-2xl">🩺</span>
             <div className="text-xs text-primary-900 dark:text-primary-200 leading-relaxed font-medium">
-              يقوم الطبيب الذكي الآن بطرح أسئلة استقصائية مخصصة لتحديد التشخيص الأدق واستبعاد الأسباب المحتملة الأخرى.
+              {language === 'ar'
+                ? 'يقوم الطبيب الذكي الآن بطرح أسئلة استقصائية مخصصة لتحديد التشخيص الأدق واستبعاد الأسباب المحتملة الأخرى.'
+                : 'The AI clinician is asking targeted clinical questions to rule out competing conditions and confirm the most accurate diagnosis.'}
             </div>
           </div>
 
@@ -603,14 +607,14 @@ export default function Assessment() {
                     </p>
                     {q.is_emergency_trigger && (
                       <span className="text-[11px] font-bold text-danger-600 dark:text-danger-400 bg-danger-50 dark:bg-danger-950 px-2 py-0.5 rounded-full border border-danger-200 dark:border-danger-800 shrink-0">
-                        مؤشر حرج
+                        {t('critical_indicator') || 'مؤشر حرج'}
                       </span>
                     )}
                   </div>
 
                   {q.clinical_purpose && (
                     <p className="text-xs text-gray-400 dark:text-gray-500 mb-3 italic">
-                      🎯 الهدف: {q.clinical_purpose}
+                      🎯 {t('clinical_purpose_label') || (language === 'en' ? 'Clinical Purpose' : 'الهدف السريري')}: {q.clinical_purpose}
                     </p>
                   )}
 
@@ -672,7 +676,7 @@ export default function Assessment() {
                   {q.answer_type === 'text' && (
                     <input
                       className="input"
-                      placeholder="اكتب إجابتك هنا..."
+                      placeholder={language === 'en' ? 'Type your answer here...' : 'اكتب إجابتك هنا...'}
                       value={followupAnswers[qId] || ''}
                       onChange={(e) =>
                         setFollowupAnswers({ ...followupAnswers, [qId]: e.target.value })
@@ -751,10 +755,10 @@ export default function Assessment() {
                 <button
                   type="button"
                   onClick={exportPDF}
-                  className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl text-xs font-bold shadow-md shadow-indigo-500/20 flex items-center gap-2 transition"
+                  className="px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-2xl text-xs font-bold shadow-md shadow-indigo-500/20 flex items-center gap-2 transition cursor-pointer"
                 >
                   <span>📄</span>
-                  <span>تصدير تقرير PDF</span>
+                  <span>{t('export_pdf_btn') || (language === 'en' ? 'Export PDF Report' : 'تصدير تقرير PDF')}</span>
                 </button>
               </div>
             </div>

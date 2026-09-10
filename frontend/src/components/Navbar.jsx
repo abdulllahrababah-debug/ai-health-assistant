@@ -9,15 +9,15 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { path: '/assessment', label: 'فحص الأعراض', icon: '🩺' },
-    { path: '/chat', label: 'طبيب AI', icon: '🤖' },
-    { path: '/dictionary', label: 'القاموس الطبي', icon: '📚' },
-    { path: '/medicines', label: 'دليل الأدوية', icon: '💊' },
+    { path: '/assessment', label: t('nav_assessment') || 'فحص الأعراض', icon: '🩺' },
+    { path: '/chat', label: t('nav_chat') || 'طبيب AI', icon: '🤖' },
+    { path: '/dictionary', label: t('nav_dictionary') || 'القاموس الطبي', icon: '📚' },
+    { path: '/medicines', label: t('nav_medicines') || 'دليل الأدوية', icon: '💊' },
   ];
 
   const userLinks = [
-    { path: '/history', label: 'سجل الفحوصات', icon: '📋' },
-    { path: '/profile', label: 'الملف الطبي', icon: '👤' },
+    { path: '/history', label: t('nav_history') || 'سجل الفحوصات', icon: '📋' },
+    { path: '/profile', label: t('nav_profile') || 'الملف الطبي', icon: '👤' },
   ];
 
   const isActive = (p) => location.pathname === p;
@@ -77,7 +77,7 @@ export default function Navbar() {
                 }`}
               >
                 <span>👑</span>
-                <span>لوحة الإدارة</span>
+                <span>{t('nav_admin') || 'لوحة الإدارة'}</span>
               </Link>
             )}
           </nav>
@@ -109,7 +109,7 @@ export default function Navbar() {
                 to="/profile"
                 className="px-3 py-1.5 rounded-xl text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 transition"
               >
-                مرحباً، {user.full_name?.split(' ')[0]}
+                {(t('nav_greeting') || 'مرحباً') + '، ' + (user.full_name?.split(' ')[0] || '')}
               </Link>
               <button
                 onClick={() => {
@@ -118,7 +118,7 @@ export default function Navbar() {
                 }}
                 className="text-xs px-3.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 font-bold transition"
               >
-                خروج
+                {t('nav_logout') || 'خروج'}
               </button>
             </div>
           ) : (
@@ -126,7 +126,7 @@ export default function Navbar() {
               to="/login"
               className="text-xs font-bold px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-md shadow-indigo-500/20 transition"
             >
-              دخول / حساب جديد
+              {t('nav_auth_btn') || 'دخول / حساب جديد'}
             </Link>
           )}
 
@@ -184,7 +184,7 @@ export default function Navbar() {
                   className="flex items-center gap-2.5 p-3 rounded-2xl text-sm font-bold text-purple-600 bg-purple-50 dark:bg-purple-950/40"
                 >
                   <span>👑</span>
-                  <span>لوحة الإدارة</span>
+                  <span>{t('nav_admin') || 'لوحة الإدارة'}</span>
                 </Link>
               )}
 
@@ -194,11 +194,21 @@ export default function Navbar() {
                   logout();
                   navigate('/login');
                 }}
-                className="w-full text-right p-3 rounded-2xl text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
+                className="w-full text-start p-3 rounded-2xl text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
               >
-                🚪 تسجيل الخروج ({user.full_name})
+                🚪 {t('nav_logout') || 'تسجيل الخروج'} ({user.full_name})
               </button>
             </>
+          )}
+
+          {!user && (
+            <Link
+              to="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block text-center p-3 rounded-2xl text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md mt-2"
+            >
+              {t('nav_auth_btn') || 'دخول / حساب جديد'}
+            </Link>
           )}
         </div>
       )}

@@ -98,6 +98,51 @@ const translations = {
     password_hint: 'يجب ألا تقل عن 6 أحرف أو أرقام',
     show_password: 'إظهار كلمة المرور',
     hide_password: 'إخفاء كلمة المرور',
+
+    // Navigation
+    nav_assessment: 'فحص الأعراض',
+    nav_chat: 'طبيب AI',
+    nav_dictionary: 'القاموس الطبي',
+    nav_medicines: 'دليل الأدوية',
+    nav_history: 'سجل الفحوصات',
+    nav_profile: 'الملف الطبي',
+    nav_admin: 'لوحة الإدارة',
+    nav_auth_btn: 'دخول / حساب جديد',
+    nav_logout: 'خروج',
+    nav_greeting: 'مرحباً',
+
+    // Chat AI Doctor
+    chat_title: 'طبيب الذكاء الاصطناعي الاستشاري',
+    chat_status: 'متصل الآن',
+    chat_subtitle: 'محادثة سريرية تفاعلية + تشخيص صور الجلد والجروح',
+    chat_secure: 'استشارة آمنة ومحمية',
+    chat_placeholder: 'اكتب أعراضك أو استفسارك الطبي هنا...',
+    chat_send: 'إرسال',
+    chat_loading: 'الطبيب يدرس الأعراض ويكتب لك التقييم...',
+    chat_welcome: 'مرحباً بك! أنا طبيبك الذكي للاستشارات الصحية الأولية 🩺\n\nتفضل بوصف ما تشعر به أو ارفع صورة لأي طفح جلدي أو إصابة لفحصها وتحليلها فوراً. كيف يمكنني مساعدتك اليوم؟',
+    chat_err_delay: 'عذراً، حدث تأخر في الاستجابة. يرجى إعادة إرسال السؤال أو وصف العارض بكلمات إضافية.',
+    chat_upload_image: 'إرفاق صورة طبية',
+    chat_image_ready: 'تم اختيار صورة جاهزة للتحليل',
+
+    // Emergency & Hospital
+    nearest_hospital_btn: '🏥 العثور على أقرب مستشفى وطوارئ (خرائط GPS)',
+    nearest_hospital_searching: 'جاري تحديد موقعك لأقرب مستشفى...',
+    nearest_hospital_title: 'المستشفيات وأقسام الطوارئ القريبة منك',
+
+    // Assessment Extra Translations
+    symptoms_subtitle: 'حدد جميع الأعراض التي تشعر بها حالياً (تتوفر أكثر من 60 عرضاً)',
+    placeholder_age: 'مثال: 32',
+    placeholder_height: 'مثال: 175',
+    placeholder_weight: 'مثال: 70',
+    placeholder_chronic: 'مثال: ضغط دم مرتفع، سكري، ربو...',
+    placeholder_meds: 'مثال: أسبرين، بنادول، أوميبرازول...',
+    placeholder_allergies: 'مثال: حساسية بنسلين، حساسية سلفا...',
+    emergency_badge: 'طوارئ',
+    critical_indicator: 'مؤشر حرج',
+    clinical_purpose_label: 'الهدف السريري',
+    export_pdf_btn: 'تصدير تقرير PDF',
+    preparing_questions: 'جاري تحضير الأسئلة الذكية...',
+    high_confidence: 'تقييم سريري عالي الدقة',
   },
   en: {
     appName: 'AI Health Assistant',
@@ -198,6 +243,51 @@ const translations = {
     password_hint: 'At least 6 characters',
     show_password: 'Show password',
     hide_password: 'Hide password',
+
+    // Navigation
+    nav_assessment: 'Symptoms Check',
+    nav_chat: 'AI Doctor',
+    nav_dictionary: 'Medical Dictionary',
+    nav_medicines: 'Medicine Guide',
+    nav_history: 'Consultation History',
+    nav_profile: 'Health Profile',
+    nav_admin: 'Admin Dashboard',
+    nav_auth_btn: 'Sign In / Register',
+    nav_logout: 'Logout',
+    nav_greeting: 'Hello',
+
+    // Chat AI Doctor
+    chat_title: 'AI Clinical Consultant Physician',
+    chat_status: 'Online Now',
+    chat_subtitle: 'Interactive clinical conversation + Skin lesion image analysis',
+    chat_secure: 'Secure & Confidential',
+    chat_placeholder: 'Type your symptoms or clinical question here...',
+    chat_send: 'Send',
+    chat_loading: 'AI Doctor is analyzing symptoms and formulating guidance...',
+    chat_welcome: 'Hello! I am your AI Clinical Medical Consultant 🩺\n\nPlease describe what symptoms you are experiencing, or upload a clear photo of any skin rash or injury for immediate clinical analysis. How may I help you today?',
+    chat_err_delay: 'Apologies, response took longer than expected. Please resend or describe your symptoms with more detail.',
+    chat_upload_image: 'Attach Medical Photo',
+    chat_image_ready: 'Image selected and ready for analysis',
+
+    // Emergency & Hospital
+    nearest_hospital_btn: '🏥 Find Nearest Hospital & ER (GPS Maps)',
+    nearest_hospital_searching: 'Locating nearest emergency department...',
+    nearest_hospital_title: 'Nearby Hospitals & Emergency Departments',
+
+    // Assessment Extra Translations
+    symptoms_subtitle: 'Select all symptoms you are currently experiencing (over 60 symptoms available)',
+    placeholder_age: 'e.g. 32',
+    placeholder_height: 'e.g. 175',
+    placeholder_weight: 'e.g. 70',
+    placeholder_chronic: 'e.g. Hypertension, Type 2 Diabetes, Asthma...',
+    placeholder_meds: 'e.g. Aspirin, Metformin, Omeprazole...',
+    placeholder_allergies: 'e.g. Penicillin allergy, Sulfa drugs...',
+    emergency_badge: 'Emergency',
+    critical_indicator: 'Critical Indicator',
+    clinical_purpose_label: 'Clinical Purpose',
+    export_pdf_btn: 'Export PDF Report',
+    preparing_questions: 'Preparing targeted diagnostic questions...',
+    high_confidence: 'High-Precision Clinical Assessment',
   },
 };
 
