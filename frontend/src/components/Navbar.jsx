@@ -85,6 +85,16 @@ export default function Navbar() {
 
         {/* Right Action Icons & Auth */}
         <div className="flex items-center gap-2">
+          {/* Nearest Hospital Emergency GPS Button */}
+          <button
+            onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=hospital+near+me', '_blank')}
+            className="text-xs font-bold px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
+            title={language === 'ar' ? 'العثور على أقرب مستشفى وطوارئ عبر خرائط GPS' : 'Find Nearest Hospital & ER via GPS'}
+          >
+            <span className="animate-pulse">🚨</span>
+            <span className="hidden sm:inline">{language === 'ar' ? 'أقرب مستشفى (GPS)' : 'Nearest ER (GPS)'}</span>
+          </button>
+
           {/* Language Toggle */}
           <button
             onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}

@@ -277,6 +277,27 @@ export default function Assessment() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">
+      {/* Quick Emergency Hospital Access Bar */}
+      <div className="mb-6 p-3.5 sm:p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+        <div className="flex items-center gap-2.5 text-rose-800 dark:text-rose-200">
+          <span className="text-xl animate-bounce">🚨</span>
+          <span className="font-bold">
+            {language === 'ar'
+              ? 'في حال الشعور بأعراض حرجة أو ألم صدري حاد، لا تنتظر الفحص — توجه فوراً للطوارئ.'
+              : 'In critical life-threatening situations, do not wait for the assessment — seek immediate ER care.'}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => window.open('https://www.google.com/maps/search/?api=1&query=hospital+near+me', '_blank')}
+          className="shrink-0 px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer"
+        >
+          <span>🏥</span>
+          <span>{language === 'ar' ? 'العثور على أقرب مستشفى وطوارئ (خرائط GPS)' : 'Find Nearest Hospital & ER (GPS)'}</span>
+          <span>↗</span>
+        </button>
+      </div>
+
       {step !== STEPS.RESULTS && <ProgressSteps current={step + 1} total={4} />}
 
       {error && (
