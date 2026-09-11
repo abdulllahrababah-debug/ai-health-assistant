@@ -13,15 +13,19 @@ export default function MedicalDictionary() {
   const isEn = language === 'en';
 
   const categories = [
-    { id: '', label: isEn ? 'All' : 'الكل' },
+    { id: '', label: isEn ? 'All (80+)' : 'الكل (80+ مرض)' },
     { id: 'تنفسي', label: isEn ? 'Respiratory 🫁' : 'الجهاز التنفسي 🫁' },
-    { id: 'جهاز هضمي', label: isEn ? 'Digestive 🤢' : 'الجهاز الهضمي 🤢' },
     { id: 'قلب وأوعية دموية', label: isEn ? 'Cardiology 💓' : 'القلب والشرايين 💓' },
+    { id: 'جهاز هضمي', label: isEn ? 'Digestive 🤢' : 'الجهاز الهضمي والكبد 🤢' },
     { id: 'غدد صماء ومناعة', label: isEn ? 'Endocrine & Diabetes 🩺' : 'الغدد والسكري 🩺' },
-    { id: 'أعصاب', label: isEn ? 'Neurology 🧠' : 'المخ والأعصاب 🧠' },
-    { id: 'أنف وأذن وحنجرة', label: isEn ? 'ENT 👂' : 'أنف وأذن 👂' },
     { id: 'عظام ومفاصل', label: isEn ? 'Musculoskeletal 🦴' : 'العظام والمفاصل 🦴' },
-    { id: 'كلى ومسالك بولية', label: isEn ? 'Urology 🚽' : 'المسالك البولية 🚽' },
+    { id: 'أعصاب', label: isEn ? 'Neurology 🧠' : 'المخ والأعصاب 🧠' },
+    { id: 'جلدية', label: isEn ? 'Dermatology 🧴' : 'الجلدية والحروق 🧴' },
+    { id: 'كلى ومسالك بولية', label: isEn ? 'Urology 🚽' : 'المسالك والكلى 🚽' },
+    { id: 'أنف وأذن وحنجرة', label: isEn ? 'ENT 👂' : 'الأنف والأذن والحنجرة 👂' },
+    { id: 'عيون', label: isEn ? 'Ophthalmology 👁️' : 'طب العيون 👁️' },
+    { id: 'صحة نفسية', label: isEn ? 'Mental Health 🧘' : 'الصحة النفسية 🧘' },
+    { id: 'دم', label: isEn ? 'Hematology 🩸' : 'أمراض الدم والمناعة 🩸' },
   ];
 
   useEffect(() => {

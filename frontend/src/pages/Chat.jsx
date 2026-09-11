@@ -15,6 +15,7 @@ export default function Chat() {
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedMimeType, setSelectedMimeType] = useState('image/jpeg');
   const [imagePreview, setImagePreview] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -51,6 +52,7 @@ export default function Chat() {
       return;
     }
 
+    setSelectedMimeType(file.type || 'image/jpeg');
     const reader = new FileReader();
     reader.onload = () => {
       setImagePreview(reader.result);
@@ -61,6 +63,7 @@ export default function Chat() {
 
   const removeImage = () => {
     setSelectedImage(null);
+    setSelectedMimeType('image/jpeg');
     setImagePreview(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -72,6 +75,7 @@ export default function Chat() {
     const currentInput = inputMessage.trim();
     const currentImgPreview = imagePreview;
     const currentImgBase64 = selectedImage;
+    const currentImgMime = selectedMimeType;
 
     // Reset input fields
     setInputMessage('');
@@ -79,7 +83,7 @@ export default function Chat() {
 
     const userMsg = {
       role: 'user',
-      content: currentInput || (language === 'ar' ? 'يرجى تحليل هذه الصورة الطبية المرفقة.' : 'Please analyze this attached medical photo.'),
+      content: currentInput || (language === 'ar' ? 'يرجى تحليل هذه الصورة الطبية المرفقة بدقة.' : 'Please analyze this attached medical photo accurately.'),
       image: currentImgPreview,
       timestamp: new Date().toLocaleTimeString(language === 'ar' ? 'ar-JO' : 'en-US', { hour: '2-digit', minute: '2-digit' })
     };
@@ -92,8 +96,8 @@ export default function Chat() {
         // Image Analysis endpoint
         const res = await api.post('/chat/analyze-image', {
           imageBase64: currentImgBase64,
-          mimeType: 'image/jpeg',
-          question: currentInput || (language === 'ar' ? 'حلل هذه الصورة الطبية وقدم تشخيصاً مبدئياً وتوصيات سريرية.' : 'Analyze this medical image and provide provisional diagnosis and clinical recommendations.'),
+          mimeType: currentImgMime || 'image/jpeg',
+          question: currentInput || (language === 'ar' ? 'حلل هذه الصورة الطبية بدقة وقدم تقييماً إشعاعياً وسريرياً فورياً وتوصيات دقيقة.' : 'Analyze this medical image accurately and provide immediate radiological/clinical evaluation and recommendations.'),
           language
         });
 
