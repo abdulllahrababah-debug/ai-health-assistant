@@ -36,9 +36,39 @@ async function detectEmergencyFromTriggerAnswers(pool, followupAnswers = {}) {
   }
 }
 
-// Helper to get available Gemini model
-function getPreferredModelName() {
-  return process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+// Candidate models for fast, accurate diagnostic intelligence
+const CANDIDATE_MODELS = [
+  process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
+  'gemini-flash-latest',
+  'gemini-3.6-flash'
+];
+
+function extractSafeJson(text) {
+  if (!text) return null;
+  let cleaned = text.trim();
+  cleaned = cleaned.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
+  
+  // Try direct parse first
+  try {
+    return JSON.parse(cleaned);
+  } catch (e1) {
+    // If wrapped or prefixed, extract from first { to last } or first [ to last ]
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      try {
+        return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+      } catch (e2) {}
+    }
+    const firstBracket = cleaned.indexOf('[');
+    const lastBracket = cleaned.lastIndexOf(']');
+    if (firstBracket !== -1 && lastBracket > firstBracket) {
+      try {
+        return JSON.parse(cleaned.slice(firstBracket, lastBracket + 1));
+      } catch (e3) {}
+    }
+    throw e1;
+  }
 }
 
 const ASSESSMENT_SYSTEM_PROMPT = `
@@ -117,39 +147,44 @@ Rules:
 - Always provide valid JSON array.
 `;
 
-// Helper to safely execute a prompt with fast timeout and instant fallback
+// Helper to safely execute a prompt with multi-model cascade, generous token ceiling, and instant fallback
 async function executeGeminiPrompt(systemInstruction, userPrompt) {
   if (!genAI) {
     throw new Error('Gemini API key is not configured');
   }
 
-  const modelName = getPreferredModelName();
+  let lastError = null;
 
-  try {
-    const model = genAI.getGenerativeModel({
-      model: modelName,
-      systemInstruction,
-      generationConfig: {
-        responseMimeType: 'application/json',
-        temperature: 0.1,
-        maxOutputTokens: 800,
-      },
-    });
+  for (const modelName of CANDIDATE_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.1,
+          maxOutputTokens: 1800,
+        },
+      });
 
-    // 10-second timeout: Gives Gemini sufficient time to write complete clinical JSON
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('AI response timeout (10s limit)')), 10000)
-    );
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('AI response timeout (12s limit)')), 12000)
+      );
 
-    const result = await Promise.race([model.generateContent(userPrompt), timeoutPromise]);
-    const text = result.response.text().trim();
-    
-    const cleanJson = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```$/i, '').trim();
-    return JSON.parse(cleanJson);
-  } catch (err) {
-    console.warn(`Fast mode: Gemini call bypassed (${err.message}). Using instant medical knowledge engine.`);
-    throw err;
+      const result = await Promise.race([model.generateContent(userPrompt), timeoutPromise]);
+      const text = result.response.text().trim();
+      const parsed = extractSafeJson(text);
+      if (parsed) {
+        return parsed;
+      }
+    } catch (err) {
+      lastError = err;
+      console.warn(`Model ${modelName} prompt execution attempt failed: ${err.message}. Trying next candidate...`);
+    }
   }
+
+  console.warn(`All candidate Gemini models failed (${lastError?.message}). Using instant medical knowledge engine.`);
+  throw lastError || new Error('All AI models failed');
 }
 
 /**
@@ -430,6 +465,120 @@ function createResilientAssessmentFallback({ symptoms, followupAnswers, profile,
           clinical_rationale_en: 'Physical symptoms correlated with psychological distress confirm psychosomatic component.',
           suggested_investigations_ar: ['مراجعة طبيب نفسي أو معالج نفسي', 'استبعاد الأسباب العضوية بالفحوص الأساسية'],
           suggested_investigations_en: ['Psychiatric Evaluation', 'Baseline Blood Work to Exclude Organic Causes'],
+          urgency_level: 'routine',
+          recommend_doctor_visit: true,
+        },
+      ],
+    },
+    {
+      score: has('ear_pain', 'sore_throat', 'sinus_pressure', 'hoarseness', 'nosebleed', 'ear', 'sinus', 'throat'),
+      tag: 'ent',
+      conditions: [
+        {
+          name_ar: symptomStr.includes('ear_pain') ? 'التهاب الأذن الوسطى الحاد (Acute Otitis Media)' : (symptomStr.includes('sinus') ? 'التهاب الجيوب الأنفية الحاد (Acute Sinusitis)' : 'التهاب الحلق والبلعوم الحاد (Acute Pharyngitis)'),
+          name_en: symptomStr.includes('ear_pain') ? 'Acute Otitis Media' : (symptomStr.includes('sinus') ? 'Acute Sinusitis' : 'Acute Pharyngitis'),
+          probability_percent: 85,
+          explanation_ar: 'التهاب يصيب الأنسجة المخاطية للأنف والأذن والحلق ناتج عن عدوى فيروسية أو بكتيرية ثانوية.',
+          explanation_en: 'Acute mucosal inflammation of the upper aerodigestive tract due to viral or bacterial cause.',
+          clinical_rationale_ar: 'تطابق الأعراض الموضعية في الأذن والأنف والحلق مع العدوى السريرية للأنف والأذن والحنجرة.',
+          clinical_rationale_en: 'Localized otorhinolaryngological presentation matches acute ENT infection.',
+          suggested_investigations_ar: ['فحص الأذن والأنف والحنجرة بمنظار الأذن (Otoscopy)', 'مسحة الحلق السريعة'],
+          suggested_investigations_en: ['Otoscopic & Pharyngeal Exam', 'Rapid Throat Swab'],
+          urgency_level: 'routine',
+          recommend_doctor_visit: true,
+        },
+      ],
+    },
+    {
+      score: has('eye_redness', 'eye_pain', 'photophobia', 'blurred_vision', 'eye'),
+      tag: 'ophthalmological',
+      conditions: [
+        {
+          name_ar: 'التهاب ملتحمة العين أو جفاف القرنية (Conjunctivitis / Keratoconjunctivitis)',
+          name_en: 'Acute Conjunctivitis / Corneal Irritation',
+          probability_percent: 87,
+          explanation_ar: 'تهيج والتهاب في الغشاء الخارجي المبطن للعين نتيجة عدوى أو حساسية أو إجهاد بصري شديد.',
+          explanation_en: 'Inflammation of ocular conjunctiva caused by infection, allergy, or severe dry eye.',
+          clinical_rationale_ar: 'احمرار العين وألمها مع التحسس الضوئي يستدعي تقييماً متخصصاً لمنع تأثر القرنية.',
+          clinical_rationale_en: 'Ocular erythema with photophobia requires dedicated slit-lamp evaluation.',
+          suggested_investigations_ar: ['فحص قاع العين والمصباح الشقي (Slit-lamp examination)', 'قياس ضغط العين'],
+          suggested_investigations_en: ['Slit-lamp Biomicroscopy', 'Intraocular Pressure Measurement'],
+          urgency_level: 'routine',
+          recommend_doctor_visit: true,
+        },
+      ],
+    },
+    {
+      score: has('knee_pain', 'sciatica', 'leg_pain', 'foot_pain', 'muscle_weakness'),
+      tag: 'ortho_lower_extremity',
+      conditions: [
+        {
+          name_ar: symptomStr.includes('sciatica') ? 'عرق النسا والاعتلال الجذري القطني (Sciatica / Lumbar Radiculopathy)' : 'إجهاد والتواء مفصل الركبة والأربطة (Knee Joint & Ligament Strain)',
+          name_en: symptomStr.includes('sciatica') ? 'Sciatica / Lumbar Radiculopathy' : 'Knee Joint / Ligamentous Strain',
+          probability_percent: 88,
+          explanation_ar: 'انضغاط العصب الوركي في الظهر أو إجهاد أربطة وغضاريف الركبة يعيق الحركة والمشي الطبيعي.',
+          explanation_en: 'Sciatic nerve root irritation or knee ligament/meniscal strain compromising weight-bearing.',
+          clinical_rationale_ar: 'امتداد الألم في الساق أو تركز الإصابة بالركبة يؤكد المنشأ الميكانيكي العصبي الهيكلي.',
+          clinical_rationale_en: 'Radiating lower limb pain or focal knee tenderness confirms mechanical/radicular pathology.',
+          suggested_investigations_ar: ['أشعة سينية أو رنين مغناطيسي (MRI)', 'فحص التوصيل العصبي (EMG)'],
+          suggested_investigations_en: ['Plain X-Ray or Magnetic Resonance Imaging (MRI)', 'Electromyography (EMG)'],
+          urgency_level: 'routine',
+          recommend_doctor_visit: true,
+        },
+      ],
+    },
+    {
+      score: has('jaundice', 'rectal_bleeding', 'dysphagia'),
+      tag: 'digestive_critical',
+      conditions: [
+        {
+          name_ar: symptomStr.includes('jaundice') ? 'اضطراب الكبد والقنوات الصفراوية (Hepatobiliary Dysfunction)' : 'نزف هضمي سفلي يستدعي التقييم (Lower GI Bleeding / Hemorrhoidal)',
+          name_en: symptomStr.includes('jaundice') ? 'Hepatobiliary Dysfunction' : 'Lower Gastrointestinal Bleeding',
+          probability_percent: 86,
+          explanation_ar: 'أعراض نوعية هضمية (كاليرقان أو نزف المستقيم) تتطلب فحصاً مخبرياً وسريرياً دقيقاً.',
+          explanation_en: 'Specific digestive red-flag symptoms requiring targeted clinical workup.',
+          clinical_rationale_ar: 'وجود اليرقان أو خروج الدم مع الإخراج يستلزم استبعاد الأسباب العضوية الجراحية.',
+          clinical_rationale_en: 'Presence of jaundice or rectal bleeding mandates comprehensive gastrointestinal workup.',
+          suggested_investigations_ar: ['فحص وظائف الكبد (LFTs)', 'تعداد الدم الكامل (CBC)', 'تنظير هضمي أو سونار بطني'],
+          suggested_investigations_en: ['Liver Function Tests (LFTs)', 'Complete Blood Count', 'Abdominal Ultrasound or Endoscopy'],
+          urgency_level: 'routine',
+          recommend_doctor_visit: true,
+        },
+      ],
+    },
+    {
+      score: has('toothache', 'gum_bleeding'),
+      tag: 'dental',
+      conditions: [
+        {
+          name_ar: 'التهاب عصب السن الحاد أو خراج سني (Acute Dental Pulpitis / Abscess)',
+          name_en: 'Acute Dental Pulpitis / Periapical Abscess',
+          probability_percent: 92,
+          explanation_ar: 'التهاب بكتيري عميق في لب السن أو دواعم الأسنان واللثة يسبب ألماً نابضاً شديداً.',
+          explanation_en: 'Deep bacterial infection of dental pulp or periodontal tissues causing severe throbbing pain.',
+          clinical_rationale_ar: 'ألم السن الحاد النابض ونزف اللثة يشير لالتهاب بكتيري سني محدد.',
+          clinical_rationale_en: 'Focal dental pain and gingival bleeding are diagnostic of odontogenic infection.',
+          suggested_investigations_ar: ['أشعة بانوراما للأسنان (OPG)', 'فحص سريري لدى طبيب وجراح الأسنان'],
+          suggested_investigations_en: ['Dental Panoramic Radiograph (OPG)', 'In-person Dental Clinical Exam'],
+          urgency_level: 'routine',
+          recommend_doctor_visit: true,
+        },
+      ],
+    },
+    {
+      score: has('excessive_thirst', 'unexplained_weight_loss', 'night_sweats', 'chills'),
+      tag: 'endocrine_systemic',
+      conditions: [
+        {
+          name_ar: symptomStr.includes('excessive_thirst') ? 'اضطراب استقلابي سكري محتمل (Diabetes Mellitus Screening)' : 'متلازمة حموية جهازية (Systemic Febrile Syndrome)',
+          name_en: symptomStr.includes('excessive_thirst') ? 'Diabetes Mellitus Screening' : 'Systemic Febrile Syndrome',
+          probability_percent: 82,
+          explanation_ar: 'أعراض جهازية كالعطش الزائد ونزول الوزن أو التعرق الليلي تتطلب تقييم مستويات السكر والغدد.',
+          explanation_en: 'Systemic signs of polydipsia, weight loss, or sweats warrant metabolic screening.',
+          clinical_rationale_ar: 'العطش المستمر مع التبول المتكرر يستدعي فحص السكر التراكمي ووظائف الغدد.',
+          clinical_rationale_en: 'Polydipsia with polyuria mandates fasting blood glucose and HbA1c testing.',
+          suggested_investigations_ar: ['فحص السكر التراكمي (HbA1c)', 'سكر الدم الصائم', 'فحص وظائف الغدة الدرقية (TSH)'],
+          suggested_investigations_en: ['Glycated Hemoglobin (HbA1c)', 'Fasting Blood Glucose', 'TSH'],
           urgency_level: 'routine',
           recommend_doctor_visit: true,
         },

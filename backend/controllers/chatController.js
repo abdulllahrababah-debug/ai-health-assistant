@@ -130,6 +130,78 @@ Your reported symptoms indicate potentially critical red flags that require urge
 🏥 **Recommended Medical Specialty for Consultation:** Gastroenterology & Hepatology.`;
     }
 
+    if (has('cough', 'throat', 'cold', 'flu', 'sore throat', 'tonsil', 'fever', 'runny nose', 'congestion', 'phlegm', 'sneeze')) {
+      return `Upper respiratory infections, colds, and sore throats are among the most common ailments and usually resolve within 5–7 days.
+
+**Likely Causes:**
+1. **Viral Upper Respiratory Infection (Common Cold / Pharyngitis):** Runny nose, scratchy throat, dry or productive cough, mild low-grade fever.
+2. **Streptococcal Pharyngitis (Strep Throat):** Sudden severe throat pain, difficulty swallowing, swollen white-spotted tonsils, high fever without cough.
+3. **Allergic Rhinitis / Post-nasal Drip:** Persistent tickle in the throat, clear nasal drainage, and sneezing.
+
+**Evidence-Based Immediate Care:**
+• Gargle with warm salt water (1/2 teaspoon salt in a glass of warm water) 3–4 times daily to soothe throat inflammation.
+• Drink warm liquids: honey and lemon water, ginger tea, or clear broths.
+• Inhale warm steam or use a cool-mist humidifier in your room.
+• Acetaminophen or Ibuprofen for fever and throat soreness as needed.
+
+⚠️ **Seek Medical Attention if:** You have difficulty breathing or swallowing saliva, high fever > 39°C (102.2°F), or symptoms worsening after 7 days.
+
+🏥 **Recommended Medical Specialty:** Otolaryngology (ENT) or Family Medicine.`;
+    }
+
+    if (has('eye', 'vision', 'red eye', 'pink eye', 'itchy eye', 'blurred', 'eyelid', 'tears')) {
+      return `Eye symptoms require careful attention to protect vision and reduce ocular irritation.
+
+**Common Causes:**
+1. **Conjunctivitis (Pink Eye):** Redness, watery or yellowish discharge, grittiness; can be viral, bacterial, or allergic.
+2. **Dry Eye Syndrome / Digital Eye Strain:** Burning, stinging sensation caused by prolonged screen time or dry air.
+3. **Subconjunctival Hemorrhage or Corneal Abrasion:** Painless bright red spot or sharp scratchy feeling.
+
+**Immediate Comfort Measures:**
+• Do not rub your eyes under any circumstances.
+• Apply a clean, cool or warm damp compress over closed eyelids for 10 minutes.
+• Discontinue wearing contact lenses immediately until fully resolved.
+• Use preservative-free lubricating artificial tear drops.
+
+⚠️ **Urgent Warning:** Seek immediate ophthalmologist evaluation if you have sudden loss of vision, severe eye pain, or extreme sensitivity to light (photophobia).
+
+🏥 **Recommended Medical Specialty:** Ophthalmology (Eye Clinic).`;
+    }
+
+    if (has('tooth', 'teeth', 'gum', 'jaw', 'toothache', 'dental')) {
+      return `Dental and gum pain typically stems from tooth decay, pulp inflammation, or gum swelling.
+
+**Common Causes:**
+1. **Dental Pulpitis / Cavity:** Sharp or throbbing tooth pain provoked by hot, cold, or sugary drinks.
+2. **Gingivitis / Periodontal Abscess:** Swollen, bleeding, or tender gums around teeth.
+3. **Bruxism / TMJ Dysfunction:** Dull ache radiating along the jaw and temple upon waking.
+
+**Temporary Home Relief:**
+• Rinse your mouth with warm salt water every 3–4 hours.
+• Apply an ice pack wrapped in a towel to the outside of your cheek for 15 minutes.
+• Avoid chewing on the affected side and avoid extreme hot or icy foods.
+• Over-the-counter pain relievers (Paracetamol or Ibuprofen) can provide temporary relief.
+
+⚠️ **Consult Dentist Promptly if:** You notice facial swelling, high fever, or pus discharge near the tooth (signs of an abscess).
+
+🏥 **Recommended Specialty:** Dental Surgery / Endodontics.`;
+    }
+
+    if (has('skin', 'rash', 'itch', 'spots', 'eczema', 'allergy', 'hive', 'redness')) {
+      return `Skin irritations and rashes can result from contact allergies, viral exanthems, or dermatitis.
+
+**Home Management Advice:**
+• Wash gently with lukewarm water and a fragrance-free, mild soap.
+• Avoid scratching to prevent secondary bacterial infection.
+• Apply a cool, damp cloth or calming calamine / plain moisturizing lotion.
+• Take an oral antihistamine if you experience widespread itching.
+• You can upload a photo of the skin area directly in this chat for immediate AI visual analysis.
+
+⚠️ **Seek Immediate Care if:** The rash is accompanied by lip/facial swelling, difficulty breathing, or appears as purple non-blanching spots (petechiae).
+
+🏥 **Recommended Medical Specialty:** Dermatology.`;
+    }
+
     return `Hello and welcome to your smart clinical consultation. I have received your message with care and am here to assist you.
 
 **To help me provide the most precise medical guidance, please share:**
@@ -177,6 +249,67 @@ I look forward to your response so I can assist you with targeted clinical recom
 ⚠️ **راجع الطبيب فوراً إذا:** كان هناك تورم مفاجئ شديد مع احمرار وسخونة في بطة الساق، أو عدم القدرة التامة على الوقوف.
 
 🏥 **التخصص الطبي المقترح للمراجعة:** طب وجراحة العظام والمفاصل (أو عيادة الطب الرياضي والعلاج الطبيعي).`;
+  }
+
+  // Throat, Cough, Cold, ENT
+  if (has('حلق', 'زور', 'بلعوم', 'لوز', 'كحه', 'سعال', 'رشح', 'زكام', 'بلغم', 'صوت مبحوح', 'حراره وحلق')) {
+    return `سلامتك ألف سلامة وما تشوف شر. التهاب الحلق والسعال ونزلات البرد من أكثر الحالات الشائعة وغالباً ما تشفى خلال أيام مع العناية المنزلية.
+
+**الاحتمالات الطبية الأكثر ترجيحاً:**
+1. **التهاب الحلق الفيروسي (الرشح والإنفلونزا):** سيلان الأنف، حرارة خفيفة، حكة في الحلق، وسعال جاف أو مع بلغم خفيف.
+2. **التهاب اللوزتين البكتيري (Strep Throat):** ألم شديد جداً عند البلع، صعوبة فتح الفم، حرارة مرتفعة، وتضخم الغدد الليمفاوية في الرقبة بدون رشح.
+3. **حساسية الجيوب الأنفية والبلغم المرتجع:** يسبب حكة متكررة وكحة تزداد عند النوم.
+
+**إرشادات فورية لتخفيف ألم الحلق والكحة:**
+• **الغرغرة بالماء الدافئ والملح:** (نصف ملعقة صغيرة ملح في كأس ماء دافئ) 3 مرات يومياً لتطهير الحلق وتخفيف الانتفاخ.
+• **المشروبات الدافئة:** شاي اليانسون، البابونج، أو الماء الدافئ مع العسل والليمون (مهدئ ممتاز للغشاء المخاطي).
+• **الترطيب واستنشاق البخار:** استنشاق بخار ماء دافئ يريح القصبات الهوائية ويذيب البلغم.
+• **المسكنات الآمنة:** باراسيتامول لتسكين الألم وخفض الحرارة عند الحاجة.
+
+⚠️ **علامات تستوجب مراجعة الطبيب:** صعوبة شديدة في التنفس أو البلع وسيلان اللعاب، حرارة مستمرة فوق 38.5 لأكثر من 3 أيام، أو ظهور بقع صديدية بيضاء على اللوزتين.
+
+🏥 **التخصص الطبي المقترح للمراجعة:** أنف وأذن وحنجرة (ENT) أو طب الأسرة.`;
+  }
+
+  // Eye symptoms
+  if (has('عين', 'عيون', 'احمرار عين', 'حرقان عين', 'حكه عين', 'دموع', 'رمص', 'غباش', 'ضبابيه')) {
+    return `سلامتك وألف لا بأس عليك. العين عضو حساس وأي تهيج يتطلب رعاية حذرة ومناسبة.
+
+**الاحتمالات الطبية الشائعة:**
+1. **التهاب ملتحمة العين (Conjunctivitis / العين الوردية):** احمرار، إفرازات مائية أو صفراء، شعور بوجود رمل داخل العين.
+2. **جفاف العين وإجهاد الشاشات:** حرقان، وخز، وتشوش خفيف بالرؤية بعد القراءة أو استخدام الهاتف لفترات طويلة.
+3. **حساسية العين الموسمية:** حكة شديدة في كلتا العينين مع تدميع مستمر ورغبة في فركها.
+
+**خطوات فورية للراحة:**
+• **ممنوع فرك العين تماماً** لتجنب خدش القرنية أو نقل العدوى.
+• غسل اليدين جيداً بالماء والصابون قبل لمس محيط العين.
+• وضع كمادات ماء باردة نظيفة على الجفون المغلقة لمدة 10 دقائق لتخفيف الاحتقان.
+• التوقف التام عن استخدام العدسات اللاصقة لحين زوال الأعراض بالكامل.
+• استخدام قطرات الدموع الاصطناعية المرطبة الخالية من المواد الحافظة.
+
+⚠️ **راجع طبيب العيون فوراً إذا:** كان هناك ألم حاد ومفاجئ داخل مقلة العين، فقدان أو ضعف مفاجئ في النظر، أو حساسية شديدة جداً من الضوء.
+
+🏥 **التخصص الطبي المقترح للمراجعة:** طب وجراحة العيون (Ophthalmology).`;
+  }
+
+  // Dental & Toothache
+  if (has('سن', 'اسنان', 'ضرس', 'اضراس', 'لثه', 'وجع سن', 'وجع ضرس', 'تسوس')) {
+    return `سلامتك ألف سلامة. ألم الأسنان من الآلام المزعجة جداً وغالباً ما ينشأ من عصب السن أو اللثة.
+
+**الاحتمالات الطبية:**
+1. **التهاب عصب السن (Pulpitis):** تسوس عميق وصل للعصب يسبب ألماً نابضاً يزداد مع المشروبات الباردة أو الساخنة والسكريات.
+2. **خراج سني أو التهاب لثة:** انتفاخ في اللثة حول السن، ألم عند الضغط أو العض، وربما طعم كريه في الفم.
+3. **ضرس العقل:** التهاب محيط بضرس العقل أثناء بزوغه يسبب صعوبة في فتح الفك.
+
+**تدابير منزلية لتسكين الألم مؤقتاً:**
+• المضمضة بماء دافئ وملح كل بضع ساعات لتطهير الفم وتقليل الالتهاب.
+• وضع كمادة ثلج ملفوفة بقماش على الخد من الخارج لمدة 10 دقائق.
+• تجنب الأكل على الجانب المؤلم والابتعاد عن الأطعمة الشديدة البرودة أو السخونة.
+• تناول مسكن باراسيتامول أو إيبوبروفين (إذا كانت المعدة تتحمله) لتسكين الوجع مؤقتاً.
+
+⚠️ **راجع طبيب الأسنان بأقرب وقت:** المسكنات علاج مؤقت ولا تعالج التسوس أو الالتهاب الجذري.
+
+🏥 **التخصص الطبي المقترح للمراجعة:** طب وجراحة الفم والأسنان (Dentistry).`;
   }
 
   // Headache & Dizziness
