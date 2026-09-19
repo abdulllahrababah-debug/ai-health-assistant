@@ -8,9 +8,9 @@ function getGenAI() {
 }
 
 const CANDIDATE_MODELS = [
-  process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
-  'gemini-flash-latest',
-  'gemini-3.6-flash'
+  'gemini-3.6-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.5-flash'
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -547,7 +547,7 @@ exports.sendMessage = async (req, res) => {
           });
 
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('TIMEOUT')), 12000)
+          setTimeout(() => reject(new Error('TIMEOUT')), 25000)
         );
 
         const result = await Promise.race([
