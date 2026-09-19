@@ -571,9 +571,12 @@ exports.sendMessage = async (req, res) => {
     }
 
     // Fallback: Comprehensive clinical response
-    console.warn('All Gemini models failed, serving rich clinical fallback. Last error:', lastError?.message);
+    console.warn(`[ChatController] All Gemini models failed or skipped. aiInstance exists: ${Boolean(aiInstance)}, lastError: ${lastError?.message || lastError}`);
     const fallbackReply = buildClinicalFallback(message, language);
-    return res.json({ reply: fallbackReply });
+    return res.json({
+      reply: fallbackReply,
+      _debug: { error: lastError?.message || String(lastError), keySet: Boolean(aiInstance), modelsTried: CANDIDATE_MODELS }
+    });
 
   } catch (err) {
     console.error('Chat controller error:', err);
