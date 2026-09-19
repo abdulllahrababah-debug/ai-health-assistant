@@ -1,7 +1,11 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const pool = require('../config/db');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+function getGenAI() {
+  const key = (process.env.GEMINI_API_KEY || '').trim();
+  if (!key) return null;
+  return new GoogleGenerativeAI(key);
+}
 
 const CANDIDATE_MODELS = [
   process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
@@ -526,19 +530,21 @@ exports.sendMessage = async (req, res) => {
     // Try candidate models in order of speed and reliability
     let reply = null;
     let lastError = null;
+    const aiInstance = getGenAI();
 
-    for (const modelName of CANDIDATE_MODELS) {
-      try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          systemInstruction: systemPrompt,
-          generationConfig: {
-            maxOutputTokens: 1200,
-            temperature: 0.2,
-            topK: 32,
-            topP: 0.9,
-          },
-        });
+    if (aiInstance) {
+      for (const modelName of CANDIDATE_MODELS) {
+        try {
+          const model = aiInstance.getGenerativeModel({
+            model: modelName,
+            systemInstruction: systemPrompt,
+            generationConfig: {
+              maxOutputTokens: 1200,
+              temperature: 0.2,
+              topK: 32,
+              topP: 0.9,
+            },
+          });
 
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('TIMEOUT')), 12000)
@@ -557,6 +563,7 @@ exports.sendMessage = async (req, res) => {
         lastError = err;
         console.warn(`Model ${modelName} attempt failed: ${err.message}. Trying next candidate...`);
       }
+    }
     }
 
     if (reply && reply.trim().length > 15) {
@@ -584,7 +591,6 @@ exports.analyzeImage = async (req, res) => {
       return res.status(400).json({ message: language === 'en' ? 'Image is required for analysis' : 'الصورة مطلوبة للتحليل' });
     }
 
-
     const isEn = language === 'en';
     const defaultQuestion = isEn
       ? 'Analyze this medical image comprehensively. Identify the imaging modality, all visible findings, probable diagnoses, and recommended specialty.'
@@ -592,65 +598,21 @@ exports.analyzeImage = async (req, res) => {
     const targetQuestion = question || defaultQuestion;
 
     const imageSysPrompt = isEn
-      ? `You are an Expert AI Medical Imaging Analyst with advanced specialization across ALL clinical imaging modalities and medical photography. You analyze any type of medical image with high accuracy.
-
-## Image Types You Expertly Analyze:
-- **Radiological (X-Ray / Plain Film):** Bone fractures (complete, hairline, stress, pathological), dislocations, pneumonia, pleural effusion, pneumothorax, pulmonary infiltrates, cardiomegaly, joint space narrowing, arthritis, scoliosis, calcifications.
-- **MRI Scans:** Brain lesions, tumors, disc herniation, spinal cord compression, ligament tears (ACL/PCL), meniscal tears, soft tissue masses, brain hemorrhage, stroke infarcts.
-- **CT Scans:** Internal organ pathology, abdominal masses, appendicitis, trauma injuries, intracranial hemorrhage, pulmonary embolism.
-- **Ultrasound Images:** Gallstones, kidney stones, ovarian cysts, fetal assessment, thyroid nodules, DVT screening.
-- **ECG / EKG Tracings:** Arrhythmias, atrial fibrillation, ST elevation MI (STEMI), bundle branch blocks, tachycardia, bradycardia, QT prolongation.
-- **Dermatological / Wound Photos:** Skin rashes, eczema, psoriasis, dermatitis, wound infections, abscess, cellulitis, melanoma red flags, burns, pressure sores.
-- **Ophthalmological Images:** Fundus photos, retinal detachment, papilledema, diabetic retinopathy, glaucoma changes, corneal ulcers.
-- **Orthopedic / Joint Images:** Bone pathology, joint effusion, metallic implants, growth plate injuries, osteomyelitis.
-- **Histopathology / Lab Images:** Cell morphology analysis, tissue samples.
-
-## Structured Output Format (ALWAYS follow this):
-1. 🔬 **Imaging Modality & Anatomical Region:** Identify what type of image this is (X-ray, MRI, CT, ECG, skin photo, fundus, etc.) and the anatomical region shown.
-2. 📋 **Key Visual Findings:** Describe all abnormal and relevant normal findings visible in the image in precise clinical detail (describe location, size, density, pattern, symmetry, etc.).
-3. 🩺 **Most Probable Diagnoses (Differential):** List 2-4 most likely diagnoses ranked by probability with brief clinical reasoning for each.
-4. ⚠️ **Critical Red Flags:** Any urgent findings requiring immediate medical attention or emergency referral.
-5. 💊 **Clinical Recommendations:** Next diagnostic steps (additional imaging, labs, specialist referral), any immediate measures.
-6. 🏥 **Recommended Medical Specialty:** [e.g., Orthopedic Surgery, Radiology, Pulmonology, Cardiology, Dermatology, Neurosurgery, Ophthalmology, Emergency Medicine].
-
-## Important Notes:
-- If the image quality is poor, describe what IS visible and note the limitation.
-- Always state: "This is an AI-assisted preliminary assessment for educational purposes. An in-person specialist evaluation is required for definitive diagnosis and treatment."
-- Provide your best clinical analysis even for challenging or unclear images — do NOT refuse or give generic responses.`
-      : `أنت محلل تصوير طبي ذكي خبير في جميع أنواع الصور الطبية والتصوير الإشعاعي والسريري. تحلل أي نوع من الصور الطبية بدقة عالية جداً.
-
-## أنواع الصور التي تحللها بخبرة عالية:
-- **الأشعة السينية (X-Ray):** كسور العظام (الكاملة، الشعرية، الإجهادية)، خلع المفاصل، التهاب الرئة، انصباب الجنب، استرواح الصدر، تضخم القلب، ضيق الفجوة المفصلية، الالتهاب المفصلي، الجنف، التكلسات.
-- **التصوير بالرنين المغناطيسي (MRI):** آفات الدماغ، الأورام، انزلاق الغضاريف، الانضغاط النخاعي، تمزق الأربطة (الرباط الصليبي)، تمزق الغضروف الهلالي، كتل الأنسجة الرخوة، النزيف الدماغي، احتشاء السكتة الدماغية.
-- **التصوير المقطعي (CT):** أمراض الأعضاء الداخلية، الكتل البطنية، التهاب الزائدة الدودية، إصابات الصدمات، النزف داخل الجمجمة، الانسداد الرئوي.
-- **تخطيط القلب الكهربائي (ECG/EKG):** اضطرابات النظم، الرجفان الأذيني، احتشاء عضلة القلب الحاد (STEMI)، حصار الحزمة، تسرع القلب، بطء القلب.
-- **صور الجلد والجروح:** الطفح الجلدي، الإكزيما، الصدفية، التهاب الجلد، التهاب الخلية النسيجية، الخراج، قرح الضغط، الحروق، علامات تحذير سرطان الجلد.
-- **صور العيون (Ophthalmology):** صور قاع العين، انفصال الشبكية، تورم حليمة العصب البصري، اعتلال الشبكية السكري، الزرق، قرح القرنية.
-- **صور العظام والمفاصل (Orthopedic):** أمراض العظام، انصباب المفصل، الغرسات المعدنية، إصابات نوى النمو، التهاب العظم والنقي.
-
-## تنسيق الإجابة الإلزامي (اتبعه دائماً):
-1. 🔬 **نوع التصوير والمنطقة التشريحية:** حدد نوع الصورة (أشعة سينية، رنين مغناطيسي، تصوير مقطعي، تخطيط قلب، صورة جلدية، إلخ) والمنطقة الظاهرة.
-2. 📋 **الموجودات البصرية الرئيسية:** صف بدقة سريرية جميع الموجودات الشاذة والطبيعية ذات الأهمية (الموقع، الحجم، الكثافة، النمط، التناسق، إلخ).
-3. 🩺 **التشخيصات الأكثر احتمالاً:** اذكر 2-4 تشخيصات مرتبة حسب الاحتمالية مع تفسير سريري مختصر لكل منها.
-4. ⚠️ **علامات الخطر الحرجة:** أي موجودات عاجلة تستوجب التدخل الطبي الفوري أو الإحالة الطارئة.
-5. 💊 **التوصيات السريرية:** الخطوات التشخيصية التالية (تصوير إضافي، فحوصات مختبرية، إحالة للاختصاصي)، أي تدابير فورية.
-6. 🏥 **التخصص الطبي المقترح:** [مثل: جراحة العظام والمفاصل، الأشعة التشخيصية، أمراض الصدر والرئتين، أمراض القلب، الأمراض الجلدية، جراحة المخ والأعصاب، طب الطوارئ].
-
-## ملاحظات هامة:
-- إذا كانت جودة الصورة ضعيفة، صف ما هو مرئي وأشر إلى القيد.
-- اذكر دائماً: "هذا تقييم أولي بمساعدة الذكاء الاصطناعي لأغراض استرشادية. يُستوجب الفحص المتخصص الشخصي للتشخيص والعلاج النهائي."
-- قدم أفضل تحليل سريري حتى للصور الصعبة أو غير الواضحة — لا ترفض التحليل أو تعطي إجابة عامة مبهمة.`;
+      ? `You are an Expert AI Medical Imaging Analyst with advanced specialization across ALL clinical imaging modalities and medical photography. You analyze any type of medical image with high accuracy.`
+      : `أنت محلل تصوير طبي ذكي خبير في جميع أنواع الصور الطبية والتصوير الإشعاعي والسريري. تحلل أي نوع من الصور الطبية بدقة عالية جداً.`;
 
     const visionModels = ['gemini-3.5-flash-lite', 'gemini-flash-latest'];
     let analysis = null;
+    const aiInstance = getGenAI();
 
-    for (const mName of visionModels) {
-      try {
-        const model = genAI.getGenerativeModel({
-          model: mName,
-          systemInstruction: imageSysPrompt,
-          generationConfig: { maxOutputTokens: 1400, temperature: 0.15, topK: 32, topP: 0.9 },
-        });
+    if (aiInstance) {
+      for (const mName of visionModels) {
+        try {
+          const model = aiInstance.getGenerativeModel({
+            model: mName,
+            systemInstruction: imageSysPrompt,
+            generationConfig: { maxOutputTokens: 1400, temperature: 0.15, topK: 32, topP: 0.9 },
+          });
 
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('TIMEOUT')), 18000)
@@ -669,6 +631,7 @@ exports.analyzeImage = async (req, res) => {
       } catch (vErr) {
         console.warn(`Vision model ${mName} failed: ${vErr.message}`);
       }
+    }
     }
 
     if (analysis && analysis.trim().length > 20) {

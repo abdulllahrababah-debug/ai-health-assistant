@@ -39,7 +39,16 @@ const assessmentLimiter = rateLimit({
 app.use('/api/diagnosis/assess', assessmentLimiter);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'AI Health Assistant API is running', timestamp: new Date() });
+  const hasKey = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.trim());
+  const prefix = hasKey ? process.env.GEMINI_API_KEY.slice(0, 6) + '...' : 'none';
+  res.json({
+    status: 'ok',
+    message: 'AI Health Assistant API is running',
+    geminiConfigured: hasKey,
+    keyPrefix: prefix,
+    model: process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite',
+    timestamp: new Date()
+  });
 });
 
 app.use('/api/auth', authRoutes);
