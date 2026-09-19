@@ -110,10 +110,10 @@ export default function Chat() {
           }
         ]);
       } else {
-        // Text Chat endpoint with history context
+        // Text Chat endpoint with full comparative conversation history
         const chatHistory = messages
           .filter((m) => m.role === 'user' || m.role === 'assistant')
-          .slice(-6)
+          .slice(-20)
           .map((m) => ({
             role: m.role === 'user' ? 'user' : 'model',
             content: m.content

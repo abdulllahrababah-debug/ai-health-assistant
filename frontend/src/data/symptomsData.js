@@ -81,6 +81,18 @@ const SYMPTOMS = [
   { code: 'blood_in_urine', name_ar: 'دم في البول (بول أحمر أو وردي أو داكن)', name_en: 'Blood in Urine (Hematuria)', icon: '🩸', category: 'dermatological', emergency: true },
   { code: 'flank_kidney_pain', name_ar: 'مغص كلوي وألم حاد في الخاصرة وأسفل الظهر', name_en: 'Flank / Kidney Pain (Renal Colic)', icon: '⚡', category: 'dermatological', emergency: false },
   { code: 'urinary_urgency', name_ar: 'إلحاح بولي مفاجئ وصعوبة في حبس البول', name_en: 'Urinary Urgency & Incontinence', icon: '💧', category: 'dermatological', emergency: false },
+
+  // 8. الغدد الصماء والأورام والمناعة (Endocrine, Lymphatic & Glandular)
+  { code: 'swollen_neck_gland', name_ar: 'ظهور ورم أو كتلة في الرقبة (غدد لمفاوية)', name_en: 'Swollen Neck Gland / Lymph Node', icon: '🧷', category: 'general', emergency: false },
+  { code: 'thyroid_enlargement', name_ar: 'تضخم في الغدة الدرقية وأسفل مقدمة العنق', name_en: 'Thyroid Enlargement (Goiter)', icon: '🦋', category: 'general', emergency: false },
+  { code: 'axillary_swelling', name_ar: 'كتلة أو انتفاخ مؤلم تحت الإبط', name_en: 'Axillary Swelling / Armpit Lump', icon: '🩺', category: 'general', emergency: false },
+  { code: 'groin_lump', name_ar: 'انتفاخ أو ورم في منطقة أعلى الفخذ (أصل الفخذ)', name_en: 'Groin Lump / Inguinal Swelling', icon: '🩹', category: 'general', emergency: false },
+  { code: 'persistent_fatigue_endocrine', name_ar: 'خمول شديد وتساقط شعر وجفاف بشرة (اضطراب هرموني)', name_en: 'Hormonal Fatigue & Hair Loss', icon: '🥀', category: 'general', emergency: false },
+  { code: 'dry_eyes_mouth', name_ar: 'جفاف حاد بالعينين والفم مع صعوبة البلع (مناعي)', name_en: 'Severe Dry Eyes & Mouth (Sjögren)', icon: '🏜️', category: 'general', emergency: false },
+  { code: 'cold_fingers_raynaud', name_ar: 'تغير لون أطراف الأصابع للأزرق أو الأبيض مع البرد', name_en: 'Raynaud Color Changes in Fingers', icon: '❄️', category: 'dermatological', emergency: false },
+  { code: 'easy_bruising', name_ar: 'ظهور كدمات زرقاء بالجسم بسهولة بدون ضربات', name_en: 'Easy Bruising / Petechiae', icon: '🟣', category: 'dermatological', emergency: false },
+  { code: 'edema_legs', name_ar: 'انتفاخ وتورم في القدمين والساقين عند الضغط (وذمة)', name_en: 'Leg / Ankle Edema (Swelling)', icon: '🦶', category: 'musculoskeletal', emergency: false },
+  { code: 'muscle_cramps', name_ar: 'تشنجات عضلية متكررة ومؤلمة في بطة الساق', name_en: 'Frequent Muscle Cramps', icon: '⚡', category: 'musculoskeletal', emergency: false },
 ];
 
 export default SYMPTOMS;

@@ -81,6 +81,18 @@ const SYMPTOMS_SEED = [
   { code: 'blood_in_urine', ar: 'دم في البول (بول أحمر أو وردي أو داكن)', en: 'Blood in Urine (Hematuria)', cat: 'dermatological', icon: '🩸', em: true },
   { code: 'flank_kidney_pain', ar: 'مغص كلوي وألم حاد في الخاصرة وأسفل الظهر', en: 'Flank / Kidney Pain (Renal Colic)', cat: 'dermatological', icon: '⚡', em: false },
   { code: 'urinary_urgency', ar: 'إلحاح بولي مفاجئ وصعوبة في حبس البول', en: 'Urinary Urgency & Incontinence', cat: 'dermatological', icon: '💧', em: false },
+
+  // 8. Endocrine, Glands & Immune
+  { code: 'swollen_neck_gland', ar: 'ظهور ورم أو كتلة في الرقبة (غدد لمفاوية)', en: 'Swollen Neck Gland / Lymph Node', cat: 'general', icon: '🧷', em: false },
+  { code: 'thyroid_enlargement', ar: 'تضخم في الغدة الدرقية وأسفل مقدمة العنق', en: 'Thyroid Enlargement (Goiter)', cat: 'general', icon: '🦋', em: false },
+  { code: 'axillary_swelling', ar: 'كتلة أو انتفاخ مؤلم تحت الإبط', en: 'Axillary Swelling / Armpit Lump', cat: 'general', icon: '🩺', em: false },
+  { code: 'groin_lump', ar: 'انتفاخ أو ورم في منطقة أعلى الفخذ (أصل الفخذ)', en: 'Groin Lump / Inguinal Swelling', cat: 'general', icon: '🩹', em: false },
+  { code: 'persistent_fatigue_endocrine', ar: 'خمول شديد وتساقط شعر وجفاف بشرة (اضطراب هرموني)', en: 'Hormonal Fatigue & Hair Loss', cat: 'general', icon: '🥀', em: false },
+  { code: 'dry_eyes_mouth', ar: 'جفاف حاد بالعينين والفم مع صعوبة البلع (مناعي)', en: 'Severe Dry Eyes & Mouth (Sjögren)', cat: 'general', icon: '🏜️', em: false },
+  { code: 'cold_fingers_raynaud', ar: 'تغير لون أطراف الأصابع للأزرق أو الأبيض مع البرد', en: 'Raynaud Color Changes in Fingers', cat: 'dermatological', icon: '❄️', em: false },
+  { code: 'easy_bruising', ar: 'ظهور كدمات زرقاء بالجسم بسهولة بدون ضربات', en: 'Easy Bruising / Petechiae', cat: 'dermatological', icon: '🟣', em: false },
+  { code: 'edema_legs', ar: 'انتفاخ وتورم في القدمين والساقين عند الضغط (وذمة)', en: 'Leg / Ankle Edema (Swelling)', cat: 'musculoskeletal', icon: '🦶', em: false },
+  { code: 'muscle_cramps', ar: 'تشنجات عضلية متكررة ومؤلمة في بطة الساق', en: 'Frequent Muscle Cramps', cat: 'musculoskeletal', icon: '⚡', em: false },
 ];
 
 async function autoMigrate() {
@@ -117,6 +129,12 @@ async function autoMigrate() {
     }
 
     console.log('[AutoMigrate] Database verification & auto-seeding completed successfully with ' + SYMPTOMS_SEED.length + ' symptoms ✅');
+
+    // Auto-promote owner to admin
+    try {
+      await pool.query("UPDATE users SET role = 'admin' WHERE email = 'abdullahrababah@gmail.com' AND role != 'admin'");
+      console.log('[AutoMigrate] Owner admin promotion check completed ✅');
+    } catch (e) {}
   } catch (err) {
     console.error('[AutoMigrate] Notice during auto-migration (continuing):', err.message);
   }
